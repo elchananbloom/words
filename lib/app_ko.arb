@@ -1,0 +1,12 @@
+{
+    "language": "한국",
+    "languageCode": "ko",
+    "secondLanguage": "{language}",
+    "secondLanguageCode": "{languageCode}",
+    "chooseLanguage": "언어 선택",
+    "chooseAppLanguage": "앱 언어 선택",
+    "addWord": "단어 추가",
+    "sentenceInLanguage": "{language} 문장",
+    "image": "이미지"
+
+}

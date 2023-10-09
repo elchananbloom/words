@@ -1,0 +1,13 @@
+{
+    "language": "עברית",
+    "languageCode": "iw",
+    "secondLanguage": "{language}",
+    "secondLanguageCode": "{languageCode}",
+    "chooseLanguage": "בחר שפה ללמוד",
+    "chooseAppLanguage": "בחר שפה לאפליקציה",
+    "addWord": "הוסף מילה",
+    "sentenceInLanguage": "משפט בשפה: {language}",
+    "image": "תמונה"
+
+
+}

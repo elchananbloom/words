@@ -1,0 +1,54 @@
+{
+    "language": "English",
+    "@language": {
+        "description": "the main app language"
+    },
+    "languageCode": "en",
+    "@languageCode": {
+        "description": "the main app language code"
+    },
+    "secondLanguageCode": "{languageCode}",
+    "@secondLanguageCode": {
+        "description": "the current language code to learn",
+        "placeholders": {
+            "languageCode": {
+                "type": "String"
+            }
+        }
+    },
+    "secondLanguage": "{language}",
+    "@secondLanguage": {
+        "description": "the current language to learn",
+        "placeholders": {
+            "language": {
+                "type": "String"
+            }
+        }
+    },
+    "chooseLanguage": "Choose language to learn",
+    "@chooseLanguage": {
+        "description": "choose the language to learn"
+    },
+    "chooseAppLanguage": "Choose the app language",
+    "@appLanguage": {
+        "description": "the app language"
+    },
+    "addWord": "Add word",
+    "@addWord": {
+        "description": "add new word"
+    },
+
+    "sentenceInLanguage": "Sentence in {language}",
+    "@sentenceInLanguage": {
+        "description": "sentence in language",
+        "placeholders": {
+            "language": {
+                "type": "String"
+            }
+        }
+    },
+    "image": "Image",
+    "@image": {
+        "description": "the image"
+    }
+}
