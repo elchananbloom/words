@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:words/db/sql_helper.dart';
 import 'package:words/models/enums.dart';
 import 'package:words/pages/language_picker.dart';
+import 'package:words/pages/search/searchbar_input_decoration.dart';
 import 'package:words/utills/word_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:words/providers/new_word.dart';
@@ -31,14 +32,17 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
   // const MyHomePage({Key? key}) : super(key: key);
   List<Word> _words = [];
   bool _isLouding = true;
+  var decoration;
 
+  final _searchFocusNode = FocusNode();
+  final _searchController = TextEditingController();
   final FocusNode _firstFocusNode = FocusNode();
   final FocusNode _secondFocusNode = FocusNode();
   final TextEditingController _firstController = TextEditingController();
   final TextEditingController _secondController = TextEditingController();
 
-  void _refreshWords(String lang) async {
-    final data = await SQLHelper.getWords(lang);
+  void _refreshWords(String lang, {String query = ''}) async {
+    final data = await SQLHelper.getWordsBySearch(lang, query);
     setState(() {
       _words = data;
       _isLouding = false;
@@ -50,9 +54,48 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     _refreshWords(lang);
   }
 
+  void handleClose() {
+    _searchController.clear();
+    _searchFocusNode.unfocus();
+    final langCodeToLearn =
+        ref.read(languageCodeToLearnProvider.notifier).state;
+    _refreshWords(langCodeToLearn);
+  }
+
+  void handleSearch() {
+    _searchFocusNode.unfocus();
+  }
+
   @override
   void initState() {
     super.initState();
+    decoration = CustomInputDecoration(
+      handleClose: handleClose,
+      handleSearch: handleSearch,
+      isPressed: false,
+    ).getDecoration();
+    _searchFocusNode.addListener(
+      () {
+        if (_searchFocusNode.hasFocus) {
+          setState(() {
+            decoration = CustomInputDecoration(
+              handleClose: handleClose,
+              handleSearch: handleSearch,
+              isPressed: true,
+            ).getDecoration();
+          });
+        } else {
+          setState(() {
+            decoration = CustomInputDecoration(
+              handleClose: handleClose,
+              handleSearch: handleSearch,
+              isPressed: false,
+            ).getDecoration();
+          });
+        }
+      },
+    );
+
     print('initState: MyHomePage');
     final langCodeToLearn =
         ref.read(languageCodeToLearnProvider.notifier).state;
@@ -67,6 +110,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     _secondFocusNode.dispose();
     _firstController.dispose();
     _secondController.dispose();
+    _searchFocusNode.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -86,10 +131,17 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          toolbarHeight: 40,
+          toolbarHeight: 60,
           backgroundColor: Colors.cyan,
           centerTitle: true,
           elevation: 0,
+          actions: [
+            LanguagePickerWidget(
+                langProvider: languageCodeToLearnProvider,
+                isAppLang: false,
+                isChangeLang: true,
+                func: refreshWordsCallback),
+          ],
           title: const Text(
             'Words',
             style: TextStyle(
@@ -101,13 +153,29 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
         ),
         body: Column(
           children: [
-            LanguagePickerWidget(
-                langProvider: languageCodeToLearnProvider,
-                isAppLang: false,
-                isChangeLang: true,
-                func: refreshWordsCallback),
             const SizedBox(
+              height: 20,
+            ),
+            SizedBox(
+              // width: 300,
               height: 50,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 20, right: 20),
+                child: TextField(
+                  controller: _searchController,
+                  focusNode: _searchFocusNode,
+                  decoration: decoration,
+                  textAlignVertical: TextAlignVertical.top,
+                  onChanged: (value) {
+                    print('searchTermProvider: $value');
+                    _refreshWords(languageCodeToLearn, query: value);
+                    // ref.read(searchTermProvider.notifier).state = value;
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 20,
             ),
             SizedBox(
               width: 300,

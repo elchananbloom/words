@@ -84,6 +84,37 @@ class SQLHelper {
     });
   }
 
+  static Future<List<Word>> getWordsBySearch(String lang, String search) async {
+    final db = await SQLHelper.db();
+    final List<Map<String, dynamic>> maps = await db.query(
+      'words',
+      where: 'language = ? AND (first_lang LIKE ? OR second_lang LIKE ?)',
+      whereArgs: [lang, '%$search%', '%$search%'],
+      orderBy: 'created_at DESC',
+    );
+
+    return List.generate(maps.length, (i) {
+      // print('getWords: ${maps[i]}');
+      final word = Word(
+        id: maps[i]['id'],
+        language: maps[i]['language'],
+        word: <Language, String>{
+          Language.english: maps[i]['english'],
+          Language.languageCodeToLearn: maps[i]['first_lang'],
+          Language.appLanguageCode: maps[i]['second_lang'],
+        },
+        sentence: <Language, String>{
+          Language.english: maps[i]['sentence_english'],
+          Language.languageCodeToLearn: maps[i]['sentence_first_lang'],
+          Language.appLanguageCode: maps[i]['sentence_second_lang'],
+        },
+        image: maps[i]['image'],
+      );
+      // print('getWordsId: ${word.id}');
+      return word;
+    });
+  }
+
   static Future<Word> getWord(int id) async {
     final db = await SQLHelper.db();
     final List<Map<String, dynamic>> maps = await db.query(

@@ -37,7 +37,10 @@ class L10n {
   }
 
   static String getLanguageName(BuildContext context, String countryCode) {
-    return LocaleNames.of(context)!.nameOf(countryCode) ?? 'iw';
+    if (countryCode == 'iw') {
+      return 'עברית';
+    }
+    return LocaleNames.of(context)!.nameOf(countryCode)!;
   }
 
   static String getLanguageCode(BuildContext context, String countryCode) {

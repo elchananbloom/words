@@ -38,43 +38,48 @@ class _LanguagePickerWidgetState
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButton<String>(
-      value: flag,
-      hint: Text('Select Item'),
-      onChanged: (String? value) {
-        setState(() {
-          flag = value!;
-        });
-        // print('onChanged: $value');
-
-        if (widget.isAppLang) {
-          final provider = Provider.of<LocaleProvider>(context, listen: false);
-          print('value: $value');
-          provider.setLocale(Locale(L10n.getLangCodeFromFlag(value!)));
-        }
-        ref.read(widget.langProvider.notifier).state =
-            L10n.getLangCodeFromFlag(value!);
-        if (widget.isChangeLang) {
-          widget.func!(L10n.getLangCodeFromFlag(value));
-        }
-        // // provider.setLocale(Locale(value.toString()));
-      },
-      items: L10n.all.map((valueItem) {
-        String a(String b) {
-          print('a: $b');
-          return b;
-        }
-
-        return DropdownMenuItem<String>(
-          value: a(L10n.getFlag(valueItem.languageCode)),
-          child: Center(
-            child: Text(
-              L10n.getFlag(valueItem.languageCode),
-              style: const TextStyle(fontSize: 32),
+    return DropdownButtonHideUnderline(
+      child: DropdownButton<String>(
+        value: flag,
+        hint: Text('Select Item'),
+        icon: Container(width: 0),
+        onChanged: (String? value) {
+          setState(() {
+            flag = value!;
+          });
+          // print('onChanged: $value');
+    
+          if (widget.isAppLang) {
+            final provider = Provider.of<LocaleProvider>(context, listen: false);
+            print('value: $value');
+            provider.setLocale(Locale(L10n.getLangCodeFromFlag(value!)));
+          }
+          ref.read(widget.langProvider.notifier).state =
+              L10n.getLangCodeFromFlag(value!);
+          if (widget.isChangeLang) {
+            widget.func!(L10n.getLangCodeFromFlag(value));
+          }
+          // // provider.setLocale(Locale(value.toString()));
+        },
+        items: L10n.all.map((valueItem) {
+          String a(String b) {
+            print('a: $b');
+            return b;
+          }
+    
+          return DropdownMenuItem<String>(
+            value: a(L10n.getFlag(valueItem.languageCode)),
+            child: CircleAvatar(
+              radius: 20,
+              backgroundColor: Colors.white,
+              child: Text(
+                L10n.getFlag(valueItem.languageCode),
+                style: const TextStyle(fontSize: 24),
+              ),
             ),
-          ),
-        );
-      }).toList(),
+          );
+        }).toList(),
+      ),
     );
 
     // return DropdownButtonHideUnderline(
