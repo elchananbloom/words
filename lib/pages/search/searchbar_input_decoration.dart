@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:words/pages/app_localization_singleton.dart';
 
 class CustomInputDecoration extends InputDecoration {
   // final FocusNode focusNode;
   final bool isPressed;
   final Function() handleClose;
 
-  CustomInputDecoration({Key? key, required this.handleClose, required Function() handleSearch, required this.isPressed})
-      : super(
+  CustomInputDecoration({
+    Key? key,
+    required this.handleClose,
+    required Function() handleSearch,
+    required this.isPressed,
+  }) : super(
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(25),
           ),
-          labelText: 'Search',
+      labelText: AppLocalizationsSingleton.getInstance()?.search ?? 'Search',
           labelStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
           // suffixIcon: Icon(
           //   Icons.clear,
@@ -18,35 +23,30 @@ class CustomInputDecoration extends InputDecoration {
           //   size: 20,
           // ),
           prefixIcon: IconButton(
-              onPressed: handleSearch,
-              icon: const Icon(
-                Icons.search,
-                color: Colors.black,
-                size: 20,
-              ),
-            
+            onPressed: handleSearch,
+            icon: const Icon(
+              Icons.search,
+              color: Colors.black,
+              size: 20,
+            ),
           ),
           floatingLabelBehavior: FloatingLabelBehavior.never,
         );
 
-        InputDecoration getDecoration(){
-          if(isPressed){
-            return copyWith(
-              suffixIcon: IconButton(
-                onPressed: handleClose,
-                icon: const Icon(
-                  Icons.clear,
-                  color: Colors.black,
-                  size: 20,
-                ),
-              ),
-            );
-          }
-          else{
-            return copyWith();
-          }
-        }
-
-  
-  
+  InputDecoration getDecoration() {
+    if (isPressed) {
+      return copyWith(
+        suffixIcon: IconButton(
+          onPressed: handleClose,
+          icon: const Icon(
+            Icons.clear,
+            color: Colors.black,
+            size: 20,
+          ),
+        ),
+      );
+    } else {
+      return copyWith();
+    }
+  }
 }

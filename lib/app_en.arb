@@ -47,6 +47,22 @@
             }
         }
     },
+    "search": "Search",
+    "@search": {
+        "description": "search"
+    },
+    "continueText": "Continue",
+    "@continue": {
+        "description": "continue"
+    },
+    "welcomeToWords": "Welcome to Words",
+    "@welcomeToWords": {
+        "description": "welcome to words"
+    },
+    "selectLanguage": "Select language",
+    "@selectLanguage": {
+        "description": "select language"
+    },
     "image": "Image",
     "@image": {
         "description": "the image"

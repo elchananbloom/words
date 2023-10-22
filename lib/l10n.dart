@@ -4,7 +4,24 @@ import 'package:words/providers/locale_provider.dart';
 import 'package:provider/provider.dart';
 
 class L10n {
-  static final all = [
+  static final allLanguages = [
+    const Locale('en'),
+    const Locale('ko'),
+    const Locale('iw'),
+    const Locale('ar'),
+    const Locale('zh'),
+    const Locale('ja'),
+    const Locale('de'),
+    const Locale('fr'),
+    const Locale('es'),
+    const Locale('it'),
+    const Locale('ru'),
+    const Locale('pt'),
+    const Locale('hi'),
+    const Locale('bn'),
+  ];
+
+  static final supportedLanguages = [
     const Locale('en'),
     const Locale('ko'),
     const Locale('iw'),
@@ -18,6 +35,30 @@ class L10n {
         return '🇺🇸';
       case 'he':
         return '🇮🇱';
+      case 'ar':
+        return '🇸🇦';
+      case 'zh':
+        return '🇨🇳';
+      case 'ja':
+        return '🇯🇵';
+      case 'de':
+        return '🇩🇪';
+      case 'fr':
+        return '🇫🇷';
+      case 'es':
+        return '🇪🇸';
+      case 'it':
+        return '🇮🇹';
+      case 'ru':
+        return '🇷🇺';
+      case 'pt':
+        return '🇵🇹';
+      case 'hi':
+        return '🇮🇳';
+      case 'bn':
+        return '🇧🇩';
+      case '+':
+        return '+';
       default:
         return 'no flag';
     }
@@ -31,6 +72,29 @@ class L10n {
         return 'en';
       case '🇮🇱':
         return 'he';
+      case '🇸🇦':
+        return 'ar';
+      case '🇨🇳':
+        return 'zh';
+      case '🇯🇵':
+        return 'ja';
+      case '🇩🇪':
+        return 'de';
+      case '🇫🇷':
+        return 'fr';
+      case '🇪🇸':
+        return 'es';
+      case '🇮🇹':
+        return 'it';
+      case '🇷🇺':
+        return 'ru';
+      case '🇵🇹':
+        return 'pt';
+      case '🇮🇳':
+        return 'hi';
+      case '🇧🇩':
+        return 'bn';
+
       default:
         return 'no flag';
     }
@@ -39,6 +103,9 @@ class L10n {
   static String getLanguageName(BuildContext context, String countryCode) {
     if (countryCode == 'iw') {
       return 'עברית';
+    }
+    if(countryCode == ''){
+      return '';
     }
     return LocaleNames.of(context)!.nameOf(countryCode)!;
   }

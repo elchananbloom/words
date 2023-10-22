@@ -1,9 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:words/db/sql_helper.dart';
 import 'package:words/models/enums.dart';
-import 'package:words/pages/language_picker.dart';
+import 'package:words/models/user.dart';
 import 'package:words/pages/search/searchbar_input_decoration.dart';
+import 'package:words/pages/user_language_picker.dart';
+import 'package:words/providers/user_provider.dart';
 import 'package:words/utills/word_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:words/providers/new_word.dart';
@@ -17,7 +20,6 @@ import 'package:html/parser.dart' show parse;
 // import 'package:brain_fusion/brain_fusion.dart';
 // import 'package:html/dom.dart';
 
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:words/l10n.dart';
 
@@ -33,6 +35,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
   List<Word> _words = [];
   bool _isLouding = true;
   var decoration;
+  // var user;
+  String languageCodeToLearn = '';
 
   final _searchFocusNode = FocusNode();
   final _searchController = TextEditingController();
@@ -47,7 +51,12 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
       _words = data;
       _isLouding = false;
     });
-    print('data: $data');
+    // print('data: $data');
+  }
+
+  User getUser() {
+    final user = ref.read(userProvider).asData!.value;
+    return user;
   }
 
   void refreshWordsCallback(String lang) {
@@ -57,9 +66,10 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
   void handleClose() {
     _searchController.clear();
     _searchFocusNode.unfocus();
-    final langCodeToLearn =
-        ref.read(languageCodeToLearnProvider.notifier).state;
-    _refreshWords(langCodeToLearn);
+    // final langCodeToLearn =
+    // ref.read(languageCodeToLearnProvider.notifier).state;
+    print('im here');
+    _refreshWords(languageCodeToLearn!);
   }
 
   void handleSearch() {
@@ -69,6 +79,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    // user = getUser();
+    setUserLanguageToLearn();
     decoration = CustomInputDecoration(
       handleClose: handleClose,
       handleSearch: handleSearch,
@@ -97,10 +109,21 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     );
 
     print('initState: MyHomePage');
-    final langCodeToLearn =
-        ref.read(languageCodeToLearnProvider.notifier).state;
-    print('langCodeToLearn: $langCodeToLearn');
-    _refreshWords(langCodeToLearn);
+    print('user: ');
+    // final langCodeToLearn = user.userLanguageToLearn;
+    // ref.read(languageCodeToLearnProvider.notifier).state;
+    print('langCodeToLearn: $languageCodeToLearn');
+    print('initState: MyHomePage end');
+  }
+
+  void setUserLanguageToLearn() {
+    getUserLanguageToLearn().then((value) {
+      setState(() {
+        languageCodeToLearn = value;
+        print('languageCodeToLearn: $languageCodeToLearn');
+        _refreshWords(languageCodeToLearn!);
+      });
+    });
   }
 
   @override
@@ -115,10 +138,17 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     super.dispose();
   }
 
+  Future<String> getUserLanguageToLearn() async {
+    final String? languageCodeToLearn =
+        await SharedPreferences.getInstance().then((prefs) {
+      return prefs.getString('userLanguageToLearn');
+    });
+    return languageCodeToLearn!;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final languageCodeToLearn =
-        ref.read(languageCodeToLearnProvider.notifier).state;
+    // ref.read(languageCodeToLearnProvider.notifier).state;
     final appLanguageCode = AppLocalizations.of(context)!.languageCode;
     print('appLanguageCode: $appLanguageCode');
     // final second_lang = ref.read(secondLangProvider.notifier).state;
@@ -136,11 +166,11 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
           centerTitle: true,
           elevation: 0,
           actions: [
-            LanguagePickerWidget(
-                langProvider: languageCodeToLearnProvider,
-                isAppLang: false,
-                isChangeLang: true,
-                func: refreshWordsCallback),
+            UserLanguagePickerWidget(
+              isChangeLang: true,
+              func: refreshWordsCallback,
+              setUserLanguageToLearn: setUserLanguageToLearn,
+            ),
           ],
           title: const Text(
             'Words',
@@ -168,7 +198,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                   textAlignVertical: TextAlignVertical.top,
                   onChanged: (value) {
                     print('searchTermProvider: $value');
-                    _refreshWords(languageCodeToLearn, query: value);
+                    _refreshWords(languageCodeToLearn!, query: value);
                     // ref.read(searchTermProvider.notifier).state = value;
                   },
                 ),
@@ -188,7 +218,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                   ref: ref,
                   secondController: _secondController,
                   secondFocusNode: _secondFocusNode,
-                  languageCodeToLearn: languageCodeToLearn,
+                  languageCodeToLearn: languageCodeToLearn!,
                   appLanguageCode: appLanguageCode,
                 ),
               ),
@@ -206,14 +236,13 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                   focusNode: _secondFocusNode,
                   decoration: InputDecoration(
                     border: const OutlineInputBorder(),
-                    labelText:
-                        L10n.getLanguageName(context, appLanguageCode) ?? '',
+                    labelText: L10n.getLanguageName(context, appLanguageCode),
                   ),
                   onChanged: (value) {
-                    ref.read(newSecondLangProvider.notifier).state = value;
+                    ref.read(newAppLangWordProvider.notifier).state = value;
                   },
                   onEditingComplete: () {
-                    addWord(context, languageCodeToLearn, appLanguageCode);
+                    addWord(context, languageCodeToLearn!, appLanguageCode);
                   },
                 ),
               ),
@@ -228,7 +257,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                 textDirection: TextDirection.rtl,
                 child: ElevatedButton(
                   onPressed: () {
-                    addWord(context, languageCodeToLearn, appLanguageCode);
+                    addWord(context, languageCodeToLearn!, appLanguageCode);
                   },
                   style: ElevatedButton.styleFrom(
                     primary: Colors.cyan,
@@ -291,7 +320,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
 
   void addWord(BuildContext context, String languageCodeToLearn,
       String appLanguageCode) async {
-    final engWord = ref.read(newEProvider.notifier).state;
+    final engWord = ref.read(newEnglishWordProvider.notifier).state;
     final url =
         'https://context.reverso.net/translation/english-hebrew/$engWord';
 
@@ -343,10 +372,10 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
       language: languageCodeToLearn,
       word: {
         Language.appLanguageCode:
-            ref.read(newSecondLangProvider.notifier).state,
+            ref.read(newAppLangWordProvider.notifier).state,
         Language.languageCodeToLearn:
-            ref.read(newFirstLangProvider.notifier).state,
-        Language.english: ref.read(newEProvider.notifier).state,
+            ref.read(newLangToLearnWordProvider.notifier).state,
+        Language.english: ref.read(newEnglishWordProvider.notifier).state,
       },
       sentence: {
         Language.appLanguageCode: secondLangSentence.text,
@@ -398,18 +427,18 @@ class KoreanTextField extends StatelessWidget {
           border: const OutlineInputBorder(),
           labelText: L10n.getLanguageName(context, _languageCodeToLearn)),
       onChanged: (value) {
-        ref.read(newFirstLangProvider.notifier).state = value;
+        ref.read(newLangToLearnWordProvider.notifier).state = value;
       },
       onEditingComplete: () async {
-        final kWord = ref.read(newFirstLangProvider.notifier).state;
+        final kWord = ref.read(newLangToLearnWordProvider.notifier).state;
         final translator = GoogleTranslator();
         final secLangTranslation = await translator.translate(kWord,
             from: _languageCodeToLearn, to: _appLanguageCode);
         final engTranslation = await translator.translate(kWord,
             from: _languageCodeToLearn, to: 'en');
-        ref.read(newEProvider.notifier).state = engTranslation.text;
+        ref.read(newEnglishWordProvider.notifier).state = engTranslation.text;
 
-        ref.read(newSecondLangProvider.notifier).state =
+        ref.read(newAppLangWordProvider.notifier).state =
             secLangTranslation.text;
         _secondController.text = secLangTranslation.text;
         print('translation: ${secLangTranslation.text}');

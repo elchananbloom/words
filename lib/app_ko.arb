@@ -7,6 +7,10 @@
     "chooseAppLanguage": "앱 언어 선택",
     "addWord": "단어 추가",
     "sentenceInLanguage": "{language} 문장",
+    "search": "검색",
+    "continueText": "계속",
+    "welcomeToWords": "단어에 오신 것을 환영합니다",
+    "selectLanguage": "언어 선택",
     "image": "이미지"
 
 }

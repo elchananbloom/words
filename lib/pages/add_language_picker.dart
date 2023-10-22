@@ -6,15 +6,18 @@ import 'package:words/providers/locale_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:words/providers/new_word.dart';
 
-class LanguagePickerWidget extends riverpod.ConsumerStatefulWidget {
-  const LanguagePickerWidget({
+class AddLanguagePickerWidget extends riverpod.ConsumerStatefulWidget {
+  const AddLanguagePickerWidget({
     Key? key,
+    required this.setSelectedLanguage,
     // required this.langProvider,
     // required this.isAppLang,
     // required this.isChangeLang,
     // required this.isWithCountry,
     // this.func,
   }) : super(key: key);
+
+  final Function(String) setSelectedLanguage;
 
   // final riverpod.StateProvider<String> langProvider;
   // final bool isAppLang;
@@ -23,22 +26,22 @@ class LanguagePickerWidget extends riverpod.ConsumerStatefulWidget {
   // final Function? func;
 
   @override
-  riverpod.ConsumerState<LanguagePickerWidget> createState() =>
+  riverpod.ConsumerState<AddLanguagePickerWidget> createState() =>
       _LanguagePickerWidgetState();
 }
 
 class _LanguagePickerWidgetState
-    extends riverpod.ConsumerState<LanguagePickerWidget> {
+    extends riverpod.ConsumerState<AddLanguagePickerWidget> {
   String? flag;
 
   @override
   void initState() {
     super.initState();
-    SharedPreferences.getInstance().then((prefs) {
-      if (prefs.getString('userLanguageToLearn') != null) {
-        flag = L10n.getFlag(prefs.getString('userLanguageToLearn')!);
-      }
-    });
+    // SharedPreferences.getInstance().then((prefs) {
+    //   if (prefs.getString('userLanguageToLearn') != null) {
+    //     flag = L10n.getFlag(prefs.getString('userLanguageToLearn')!);
+    //   }
+    // });
     // if (ref.read(widget.langProvider.notifier).state != '') {
     //   flag = L10n.getFlag(ref.read(widget.langProvider.notifier).state);
     // }
@@ -62,10 +65,11 @@ class _LanguagePickerWidgetState
           //   print('value: $value');
           //   provider.setLocale(Locale(L10n.getLangCodeFromFlag(value!)));
           // }
-          SharedPreferences.getInstance().then((prefs) {
-            prefs.setString(
-                'userLanguageToLearn', L10n.getLangCodeFromFlag(value!));
-          });
+          widget.setSelectedLanguage(L10n.getLangCodeFromFlag(value!));
+          // SharedPreferences.getInstance().then((prefs) {
+          //   prefs.setString(
+          //       'userLanguageToLearn', L10n.getLangCodeFromFlag(value!));
+          // });
           // ref.read(widget.langProvider.notifier).state =
           //     L10n.getLangCodeFromFlag(value!);
           // if (widget.isChangeLang) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:words/l10n.dart';
 import 'package:words/models/word/word.dart';
 import 'package:words/models/enums.dart';
@@ -9,23 +10,56 @@ import 'package:words/providers/new_word.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'dart:convert';
 
-class WordScreen extends ConsumerWidget {
-  WordScreen({Key? key, required this.word, required this.callback})
+import 'package:words/providers/user_provider.dart';
+
+class WordScreen extends ConsumerStatefulWidget {
+  const WordScreen({Key? key, required this.word, required this.callback})
       : super(key: key);
 
   final Word word;
   final Function callback;
 
   @override
-  Widget build(BuildContext context, ref) {
+  ConsumerState<WordScreen> createState() => _WordScreenState();
+}
+
+class _WordScreenState extends ConsumerState<WordScreen> {
+  late Word word;
+  late Function callback;
+  String? userLanguageToLearn;
+
+  @override
+  void initState() {
+    super.initState();
+    word = widget.word;
+    callback = widget.callback;
+    getUserLanguageToLearn().then((value) {
+      setState(() {
+        userLanguageToLearn = value;
+      });
+    });
+  }
+
+  Future<String> getUserLanguageToLearn() async {
+    final String? languageCodeToLearn =
+        await SharedPreferences.getInstance().then((prefs) {
+      return prefs.getString('userLanguageToLearn');
+    });
+    return languageCodeToLearn!;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final _firstWordController = TextEditingController();
     final _secondWordController = TextEditingController();
     final _firstSentenceController = TextEditingController();
     final _secondSentenceController = TextEditingController();
     final _imageController = TextEditingController();
 
-    final languageCodeToLearn =
-        ref.read(languageCodeToLearnProvider.notifier).state;
+    // final user = ref.read(userProvider).asData!.value;
+
+    final languageCodeToLearn = userLanguageToLearn!;
+    // ref.read(languageCodeToLearnProvider.notifier).state;
     final appLanguageCode = AppLocalizations.of(context)!.languageCode;
 
     // final first_lang = ref.read(firstLangProvider.notifier).state;
@@ -137,7 +171,7 @@ class WordScreen extends ConsumerWidget {
               ),
               TextField(
                 controller: _imageController,
-                decoration:  InputDecoration(
+                decoration: InputDecoration(
                   labelText: AppLocalizations.of(context)!.image,
                   border: const OutlineInputBorder(),
                 ),
@@ -199,7 +233,7 @@ class WordScreen extends ConsumerWidget {
               image: DecorationImage(
                 image: imgWidget.image,
                 filterQuality: FilterQuality.high,
-                fit: BoxFit.fitWidth,
+                fit: BoxFit.fitHeight,
               ),
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.only(

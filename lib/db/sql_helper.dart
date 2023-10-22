@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 import 'package:words/models/word/word.dart';
 import 'package:words/models/enums.dart';
+import 'package:words/models/user.dart';
 
 //hebrew and hangul to first and second language
 class SQLHelper {
@@ -20,6 +21,22 @@ class SQLHelper {
           created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
           )""");
     // print('createTables: words');
+  
+
+    await database.execute("""CREATE TABLE user (
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          app_language TEXT,
+          language_to_learn TEXT,
+          created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+          )""");
+    // print('createTables: users');
+
+    await database.execute("""CREATE TABLE languages (
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          language TEXT,
+          created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+          )""");
+    // print('createTables: languages');
   }
 
   static Future<sql.Database> db() async {
@@ -31,6 +48,78 @@ class SQLHelper {
         await createTables(db);
       },
     );
+  }
+
+  static Future<int> createUser(User user) async {
+    final db = await SQLHelper.db();
+
+    final data = {
+      'app_language': user.userLanguage,
+      'language_to_learn': user.userLanguageToLearn,
+    };
+
+    print('createUser: $data');
+
+    return db.insert('user', data,
+        conflictAlgorithm: sql.ConflictAlgorithm.replace);
+  }
+
+  static Future<int> updateUser(User user) async {
+    final db = await SQLHelper.db();
+
+    final data = {
+      'app_language': user.userLanguage,
+      'language_to_learn': user.userLanguageToLearn,
+    };
+
+    print('updateUser: $data');
+
+    return db.update(
+      'user',
+      data,
+      where: 'id = ?',
+      whereArgs: [user.id],
+    );
+  }
+
+  static Future<User> getUser() async {
+    final db = await SQLHelper.db();
+    final List<Map<String, dynamic>> maps = await db.query(
+      'user',
+      limit: 1,
+    );
+
+    return User(
+      id: maps[0]['id'],
+      userLanguage: maps[0]['app_language'],
+      userLanguageToLearn: maps[0]['language_to_learn'],
+    );
+  }
+
+  static Future<List<String>> getLanguages() async {
+    final db = await SQLHelper.db();
+    final List<Map<String, dynamic>> maps = await db.query(
+      'languages',
+      columns: ['language'],
+      groupBy: 'language',
+    );
+
+    return List.generate(maps.length, (i) {
+      return maps[i]['language'] == 'iw' ? 'he' : maps[i]['language'];
+    });
+  }
+
+  static Future<int> createLanguage(String lang) async {
+    final db = await SQLHelper.db();
+
+    final data = {
+      'language': lang,
+    };
+
+    print('createLanguage: $data');
+
+    return db.insert('languages', data,
+        conflictAlgorithm: sql.ConflictAlgorithm.replace);
   }
 
   static Future<int> createWord(Word word) async {

@@ -6,8 +6,8 @@ import 'package:words/providers/locale_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:words/providers/new_word.dart';
 
-class LanguagePickerWidget extends riverpod.ConsumerStatefulWidget {
-  const LanguagePickerWidget({
+class AppLanguagePickerWidget extends riverpod.ConsumerStatefulWidget {
+  const AppLanguagePickerWidget({
     Key? key,
     // required this.langProvider,
     // required this.isAppLang,
@@ -23,22 +23,17 @@ class LanguagePickerWidget extends riverpod.ConsumerStatefulWidget {
   // final Function? func;
 
   @override
-  riverpod.ConsumerState<LanguagePickerWidget> createState() =>
+  riverpod.ConsumerState<AppLanguagePickerWidget> createState() =>
       _LanguagePickerWidgetState();
 }
 
 class _LanguagePickerWidgetState
-    extends riverpod.ConsumerState<LanguagePickerWidget> {
+    extends riverpod.ConsumerState<AppLanguagePickerWidget> {
   String? flag;
 
   @override
   void initState() {
     super.initState();
-    SharedPreferences.getInstance().then((prefs) {
-      if (prefs.getString('userLanguageToLearn') != null) {
-        flag = L10n.getFlag(prefs.getString('userLanguageToLearn')!);
-      }
-    });
     // if (ref.read(widget.langProvider.notifier).state != '') {
     //   flag = L10n.getFlag(ref.read(widget.langProvider.notifier).state);
     // }
@@ -58,22 +53,22 @@ class _LanguagePickerWidgetState
           // print('onChanged: $value');
 
           // if (widget.isAppLang) {
-          //   final provider = Provider.of<LocaleProvider>(context, listen: false);
-          //   print('value: $value');
-          //   provider.setLocale(Locale(L10n.getLangCodeFromFlag(value!)));
-          // }
+          final provider = Provider.of<LocaleProvider>(context, listen: false);
+          print('value: $value');
+          String languageCode = L10n.getLangCodeFromFlag(value!) =='he' ? 'iw' : L10n.getLangCodeFromFlag(value);
+          provider.setLocale(Locale(languageCode));
           SharedPreferences.getInstance().then((prefs) {
-            prefs.setString(
-                'userLanguageToLearn', L10n.getLangCodeFromFlag(value!));
+            prefs.setString('appLanguage', languageCode);
           });
+          // }
           // ref.read(widget.langProvider.notifier).state =
           //     L10n.getLangCodeFromFlag(value!);
           // if (widget.isChangeLang) {
-          // widget.func!(L10n.getLangCodeFromFlag(value!));
+          //   widget.func!(L10n.getLangCodeFromFlag(value));
           // }
           // // provider.setLocale(Locale(value.toString()));
         },
-        items: L10n.allLanguages.map((valueItem) {
+        items: L10n.supportedLanguages.map((valueItem) {
           String a(String b) {
             // print('a: $b');
             return b;
