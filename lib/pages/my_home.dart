@@ -22,7 +22,6 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-
 class _MyHomePageState extends State<MyHomePage> {
   List<Word> _words = [];
   bool _isLouding = true;
