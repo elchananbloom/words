@@ -63,6 +63,36 @@
     "@selectLanguage": {
         "description": "select language"
     },
+    "updateWord": "Update word",
+    "@updateWord": {
+        "description": "update word"
+    },
+    "wordDeleted": "Word {word} deleted",
+    "@wordDeleted": {
+        "description": "word deleted",
+        "placeholders": {
+            "word": {
+                "type": "String"
+            }
+        }
+    },
+    "wordUpdated": "Word {word} updated",
+    "@wordUpdated": {
+        "description": "word updated",
+        "placeholders": {
+            "word": {
+                "type": "String"
+            }
+        }
+    },
+    "selectImage": "Select image that describe the word",
+    "@selectImage": {
+        "description": "select image"
+    },
+    "cancel": "Cancel",
+    "@cancel": {
+        "description": "cancel"
+    },
     "image": "Image",
     "@image": {
         "description": "the image"

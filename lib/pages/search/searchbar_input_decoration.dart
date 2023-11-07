@@ -5,23 +5,21 @@ class CustomInputDecoration extends InputDecoration {
   // final FocusNode focusNode;
   final bool isPressed;
   final Function() handleClose;
+  final String labelText;
 
   CustomInputDecoration({
     Key? key,
     required this.handleClose,
     required Function() handleSearch,
+    required this.labelText,
     required this.isPressed,
   }) : super(
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(25),
+            borderRadius: BorderRadius.circular(50),
           ),
-      labelText: AppLocalizationsSingleton.getInstance()?.search ?? 'Search',
+          labelText:
+              labelText,
           labelStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-          // suffixIcon: Icon(
-          //   Icons.clear,
-          //   color: Colors.grey[400],
-          //   size: 20,
-          // ),
           prefixIcon: IconButton(
             onPressed: handleSearch,
             icon: const Icon(

@@ -11,6 +11,11 @@
     "continueText": "계속",
     "welcomeToWords": "단어에 오신 것을 환영합니다",
     "selectLanguage": "언어 선택",
+    "updateWord": "단어 업데이트",
+    "wordDeleted": "단어가 {word} 삭제되었습니다",
+    "wordUpdated": "단어가 {word} 업데이트되었습니다",
+    "selectImage": "이미지 선택",
+    "cancel": "취소",
     "image": "이미지"
 
 }

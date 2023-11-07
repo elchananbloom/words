@@ -23,86 +23,86 @@ class LocaleProvider extends ChangeNotifier {
   }
 }
 
-class UserProvider extends ChangeNotifier{
-  User _user = User();
+// class UserProvider extends ChangeNotifier{
+//   User _user = User();
 
-  User get user => _user;
+//   User get user => _user;
 
-  Future<void> setUser(User user) async{
-    final u  = await SQLHelper.getUser();
-    _user = u; 
-    notifyListeners();
-  }
+//   Future<void> setUser(User user) async{
+//     final u  = await SQLHelper.getUser();
+//     _user = u; 
+//     notifyListeners();
+//   }
 
-  void clearUser() {
-    _user = User();
-    notifyListeners();
-  }
-}
+//   void clearUser() {
+//     _user = User();
+//     notifyListeners();
+//   }
+// }
 
-class NewWordProvider extends ChangeNotifier{
-  String newLearnWord = '';
-  String newAppWord = '';
-  String newEnglishWord = '';
-  Word newWord = Word();
+// class NewWordProvider extends ChangeNotifier{
+//   String newLearnWord = '';
+//   String newAppWord = '';
+//   String newEnglishWord = '';
+//   Word newWord = Word();
 
-  void setNewLearnWord(String word) {
-    newLearnWord = word;
-    notifyListeners();
-  }
+//   void setNewLearnWord(String word) {
+//     newLearnWord = word;
+//     notifyListeners();
+//   }
 
-  void setNewAppWord(String word) {
-    newAppWord = word;
-    notifyListeners();
-  }
+//   void setNewAppWord(String word) {
+//     newAppWord = word;
+//     notifyListeners();
+//   }
 
-  void setNewEnglishWord(String word) {
-    newEnglishWord = word;
-    notifyListeners();
-  }
+//   void setNewEnglishWord(String word) {
+//     newEnglishWord = word;
+//     notifyListeners();
+//   }
 
-  void setNewWord(Word word) {
-    newWord = word;
-    notifyListeners();
-  }
+//   void setNewWord(Word word) {
+//     newWord = word;
+//     notifyListeners();
+//   }
 
-  void clearNewWord() {
-    newLearnWord = '';
-    newAppWord = '';
-    newEnglishWord = '';
-    newWord = Word();
-    notifyListeners();
-  }
-}
+//   void clearNewWord() {
+//     newLearnWord = '';
+//     newAppWord = '';
+//     newEnglishWord = '';
+//     newWord = Word();
+//     notifyListeners();
+//   }
+// }
 
-class LanguageToLearn extends ChangeNotifier{
-  String _languageToLearn = '';
+// class LanguageToLearn extends ChangeNotifier{
+//   String _languageToLearn = '';
 
-  String get languageToLearn => _languageToLearn;
+//   String get languageToLearn => _languageToLearn;
 
-  void setLanguageToLearn(String language) {
-    _languageToLearn = language;
-    notifyListeners();
-  }
+//   void setLanguageToLearn(String language) {
+//     _languageToLearn = language;
+//     notifyListeners();
+//   }
 
-  void clearLanguageToLearn() {
-    _languageToLearn = '';
-    notifyListeners();
-  }
-}
+//   void clearLanguageToLearn() {
+//     _languageToLearn = '';
+//     notifyListeners();
+//   }
+// }
 
-class AppLanguage extends ChangeNotifier{
-  String _appLanguage = '';
+// class AppLanguage extends ChangeNotifier{
+//   String _appLanguage = '';
 
-  String get appLanguage => _appLanguage;
+//   String get appLanguage => _appLanguage;
 
-  void setAppLanguage(String language) {
-    _appLanguage = language;
-    notifyListeners();
-  }
+//   void setAppLanguage(String language) {
+//     _appLanguage = language;
+//     notifyListeners();
+//   }
 
-  void clearAppLanguage() {
-    _appLanguage = '';
-    notifyListeners();
-  }
-}
+//   void clearAppLanguage() {
+//     _appLanguage = '';
+//     notifyListeners();
+//   }
+// }

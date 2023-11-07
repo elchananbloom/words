@@ -1,49 +1,34 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pixabay_picker/model/pixabay_media.dart';
+import 'package:pixabay_picker/pixabay_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:words/db/sql_helper.dart';
-import 'package:words/models/enums.dart';
-import 'package:words/models/user.dart';
-import 'package:words/pages/search/searchbar_input_decoration.dart';
 import 'package:words/pages/user_language_picker.dart';
-import 'package:words/providers/user_provider.dart';
 import 'package:words/utills/word_card.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:words/providers/new_word.dart';
 import 'package:words/models/word/word.dart';
-import 'package:translator/translator.dart';
-import 'package:chaleno/chaleno.dart';
-import 'package:html/parser.dart' as html_parser;
-// import 'package:html/dom.dart' as html_dom;
+import 'package:words/pages/custom_search_bar.dart';
+import 'package:words/pages/add_word.dart';
 import 'package:http/http.dart' as http;
-import 'package:html/parser.dart' show parse;
-// import 'package:brain_fusion/brain_fusion.dart';
-// import 'package:html/dom.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:words/l10n.dart';
 
-class MyHomePage extends ConsumerStatefulWidget {
+class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends ConsumerState<MyHomePage> {
-  // const MyHomePage({Key? key}) : super(key: key);
+class _MyHomePageState extends State<MyHomePage> {
   List<Word> _words = [];
   bool _isLouding = true;
-  var decoration;
   // var user;
   String languageCodeToLearn = '';
-
-  final _searchFocusNode = FocusNode();
-  final _searchController = TextEditingController();
-  final FocusNode _firstFocusNode = FocusNode();
-  final FocusNode _secondFocusNode = FocusNode();
-  final TextEditingController _firstController = TextEditingController();
-  final TextEditingController _secondController = TextEditingController();
+  var isFavorite = true;
+  var imageUrl = '';
 
   void _refreshWords(String lang, {String query = ''}) async {
     final data = await SQLHelper.getWordsBySearch(lang, query);
@@ -51,91 +36,36 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
       _words = data;
       _isLouding = false;
     });
-    // print('data: $data');
   }
 
-  User getUser() {
-    final user = ref.read(userProvider).asData!.value;
-    return user;
+  void refreshWordsCallback(String lang, {String term = ''}) {
+    _refreshWords(lang, query: term);
   }
 
-  void refreshWordsCallback(String lang) {
-    _refreshWords(lang);
-  }
+  Future<void> _refreshFavoritesWords() async {
+    var data = await SQLHelper.getFavoritesWords(languageCodeToLearn);
 
-  void handleClose() {
-    _searchController.clear();
-    _searchFocusNode.unfocus();
-    // final langCodeToLearn =
-    // ref.read(languageCodeToLearnProvider.notifier).state;
-    print('im here');
-    _refreshWords(languageCodeToLearn!);
+    setState(() {
+      _words = data;
+      _isLouding = false;
+      isFavorite = false;
+    });
   }
-
-  void handleSearch() {
-    _searchFocusNode.unfocus();
-  }
+  
 
   @override
   void initState() {
     super.initState();
-    // user = getUser();
     setUserLanguageToLearn();
-    decoration = CustomInputDecoration(
-      handleClose: handleClose,
-      handleSearch: handleSearch,
-      isPressed: false,
-    ).getDecoration();
-    _searchFocusNode.addListener(
-      () {
-        if (_searchFocusNode.hasFocus) {
-          setState(() {
-            decoration = CustomInputDecoration(
-              handleClose: handleClose,
-              handleSearch: handleSearch,
-              isPressed: true,
-            ).getDecoration();
-          });
-        } else {
-          setState(() {
-            decoration = CustomInputDecoration(
-              handleClose: handleClose,
-              handleSearch: handleSearch,
-              isPressed: false,
-            ).getDecoration();
-          });
-        }
-      },
-    );
-
-    print('initState: MyHomePage');
-    print('user: ');
-    // final langCodeToLearn = user.userLanguageToLearn;
-    // ref.read(languageCodeToLearnProvider.notifier).state;
-    print('langCodeToLearn: $languageCodeToLearn');
-    print('initState: MyHomePage end');
   }
 
   void setUserLanguageToLearn() {
     getUserLanguageToLearn().then((value) {
       setState(() {
         languageCodeToLearn = value;
-        print('languageCodeToLearn: $languageCodeToLearn');
-        _refreshWords(languageCodeToLearn!);
+        _refreshWords(languageCodeToLearn);
       });
     });
-  }
-
-  @override
-  void dispose() {
-    // Dispose of the focus nodes and controllers when the widget is disposed.
-    _firstFocusNode.dispose();
-    _secondFocusNode.dispose();
-    _firstController.dispose();
-    _secondController.dispose();
-    _searchFocusNode.dispose();
-    _searchController.dispose();
-    super.dispose();
   }
 
   Future<String> getUserLanguageToLearn() async {
@@ -146,139 +76,104 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     return languageCodeToLearn!;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // ref.read(languageCodeToLearnProvider.notifier).state;
-    final appLanguageCode = AppLocalizations.of(context)!.languageCode;
-    print('appLanguageCode: $appLanguageCode');
-    // final second_lang = ref.read(secondLangProvider.notifier).state;
-    // final fl = Locale(first_lang).languageCode;
-    // final sl = AppLocalizations.of(context)!.languageCode;
+  Future<String> manageDownloadImage(String engWord, bool isEdit) async {
+    var documentDirectory = await getApplicationDocumentsDirectory();
+    var filePathAndName = '${documentDirectory.path}/images/$engWord.jpg';
+    //check if the directory exists
+    var exists = await File(filePathAndName).exists();
+    if (isEdit || !exists) {
+      final img = await getImageByDom(engWord, isEdit);
+      await downloadImage(img, engWord, filePathAndName);
+    }
 
-    return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).unfocus();
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          toolbarHeight: 60,
-          backgroundColor: Colors.cyan,
-          centerTitle: true,
-          elevation: 0,
-          actions: [
-            UserLanguagePickerWidget(
-              isChangeLang: true,
-              func: refreshWordsCallback,
-              setUserLanguageToLearn: setUserLanguageToLearn,
-            ),
-          ],
-          title: const Text(
-            'Words',
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-        ),
-        body: Column(
+    return filePathAndName;
+  }
+
+  Future<void> downloadImage(String? img, engWord, filePathAndName) async {
+    imageCache.clear();
+    var documentDirectory = await getApplicationDocumentsDirectory();
+    var response = await http.get(Uri.parse(img!));
+    var firstPath = '${documentDirectory.path}/images';
+    await Directory(firstPath).create(recursive: true);
+    File file = File(filePathAndName);
+
+    file.writeAsBytes(response.bodyBytes);
+  }
+
+  Future<String?> getImageByDom(String word, bool isEdit) async {
+    const String pixabayApiKey = '34130374-73ffceb0bd605f2db84f704e5';
+
+    PixabayPicker pixabayPicker = PixabayPicker(apiKey: pixabayApiKey);
+
+    PixabayResponse? pixabayResponse = await pixabayPicker.api!
+        .requestImagesWithKeyword(
+            keyword: word, category: "&orientation=horizontal");
+
+    // ignore: use_build_context_synchronously
+    await selectImage(pixabayResponse!);
+
+    if (imageUrl == '' && !isEdit) {
+      setState(() {
+        imageUrl =
+            pixabayResponse.hits![0].getDownloadLink(res: Resolution.medium)!;
+      });
+    }
+    return imageUrl;
+  }
+
+  Future<dynamic> selectImage(PixabayResponse pixabayResponse) {
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) {
+          return selectImageWidget(pixabayResponse);
+        });
+  }
+
+  AlertDialog selectImageWidget(PixabayResponse pixabayResponse) {
+    return AlertDialog(
+      content: SizedBox(
+        height: 500,
+        width: 300,
+        child: Column(
           children: [
-            const SizedBox(
-              height: 20,
-            ),
-            SizedBox(
-              // width: 300,
-              height: 50,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 20, right: 20),
-                child: TextField(
-                  controller: _searchController,
-                  focusNode: _searchFocusNode,
-                  decoration: decoration,
-                  textAlignVertical: TextAlignVertical.top,
-                  onChanged: (value) {
-                    print('searchTermProvider: $value');
-                    _refreshWords(languageCodeToLearn!, query: value);
-                    // ref.read(searchTermProvider.notifier).state = value;
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            SizedBox(
-              width: 300,
-              height: 30,
-              child: Directionality(
-                textDirection: TextDirection.rtl,
-                child: KoreanTextField(
-                  firstController: _firstController,
-                  firstFocusNode: _firstFocusNode,
-                  ref: ref,
-                  secondController: _secondController,
-                  secondFocusNode: _secondFocusNode,
-                  languageCodeToLearn: languageCodeToLearn!,
-                  appLanguageCode: appLanguageCode,
-                ),
-              ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            SizedBox(
-              width: 300,
-              height: 30,
-              child: Directionality(
-                textDirection: TextDirection.rtl,
-                child: TextField(
-                  controller: _secondController,
-                  focusNode: _secondFocusNode,
-                  decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    labelText: L10n.getLanguageName(context, appLanguageCode),
-                  ),
-                  onChanged: (value) {
-                    ref.read(newAppLangWordProvider.notifier).state = value;
-                  },
-                  onEditingComplete: () {
-                    addWord(context, languageCodeToLearn!, appLanguageCode);
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            SizedBox(
-              width: 200,
-              height: 30,
-              child: Directionality(
-                textDirection: TextDirection.rtl,
-                child: ElevatedButton(
-                  onPressed: () {
-                    addWord(context, languageCodeToLearn!, appLanguageCode);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.cyan,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: Text(AppLocalizations.of(context)!.addWord),
-                ),
-              ),
-            ),
+            Text(AppLocalizations.of(context)!.selectImage),
             const SizedBox(
               height: 20,
             ),
             Expanded(
-              child: ListView.builder(
-                itemCount: _words.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return WordCard(
-                    word: _words[index],
-                    callback: refreshWordsCallback,
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                ),
+                itemCount: pixabayResponse.hits!.length,
+                itemBuilder: (context, index) {
+                  var imgUrl = pixabayResponse.hits![index].getDownloadLink()!;
+                  var img = Image.network(imgUrl,
+                      filterQuality: FilterQuality.high, fit: BoxFit.fitWidth);
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        imageUrl = imgUrl;
+                      });
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: Colors.black,
+                          width: 1,
+                        ),
+                        color: Colors.grey[200],
+                        image: DecorationImage(
+                          image: img.image,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
                   );
                 },
               ),
@@ -289,163 +184,227 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     );
   }
 
-  Future<String?> getImageByDom(String word) async {
-    final Map<String, String> headers = {
-      HttpHeaders.userAgentHeader:
-          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.122 Safari/537.36'
-    };
-    var uri = Uri.parse(
-        'https://www.google.com.pk/search?q=$word&tbm=isch&ved=2ahUKEwiK5_jmqt_uAhWE4oUKHSH-DRYQ2-cCegQIABAA');
-
-    final response = await http.get(uri, headers: headers);
-
-    if (response.statusCode != HttpStatus.ok) {
-      return '';
-    }
-
-    var document = parse(response.body);
-
-    late final docStr = document.outerHtml;
-
-    RegExp imgRegExp = RegExp(r'<img[^>]+src="([^">]+)"');
-
-    // Find all matches in the HTML string.
-    Iterable<Match> matches = imgRegExp.allMatches(docStr);
-
-    // Extract and print the src attribute values
-    List<String?> imgSrcList = matches.map((match) => match.group(1)).toList();
-
-    return imgSrcList[15];
-  }
-
-  void addWord(BuildContext context, String languageCodeToLearn,
-      String appLanguageCode) async {
-    final engWord = ref.read(newEnglishWordProvider.notifier).state;
-    final url =
-        'https://context.reverso.net/translation/english-hebrew/$engWord';
-
-    final chaleno = await Chaleno().load(url);
-    List<Result> results = chaleno!.getElementsByClassName('example');
-
-    final res = results[0].html;
-
-    final spans = res!.split('</span>');
-
-    print('spans: ${spans[0]}');
-
-    // final secLang = spans[2].split('<span class="text" lang="en">')[1];
-
-    final eng = spans[0].split('<span class="text" lang="en">')[0];
-
-    // RegExp regex = RegExp(r'[א-ת]+');
-
-    // // Find all matches in the input string.
-    // Iterable<Match> matches = regex.allMatches(secLang);
-
-    // // Extract and print the Hebrew letters in the same order.
-    // List<String?> hebrewLetters =
-    //     matches.map((match) => match.group(0)).toList();
-
-    // String hebrewSentence = hebrewLetters.join(' ');
-    // print(hebrew);
-
-    // Parse the HTML string
-    final document = html_parser.parse(eng);
-
-    // Find the relevant element by class name or tag, e.g., <span class="text">
-    final element = document.querySelector('.text');
-
-    // Extract the text content of the element and remove leading/trailing whitespace
-    String engSentence = element?.text.trim() ?? '';
-
-    // Print the extracted sentence
-    final translator = GoogleTranslator();
-    final firstLangSentence = await translator.translate(engSentence,
-        from: 'en', to: languageCodeToLearn);
-
-    final secondLangSentence = await translator.translate(engSentence,
-        from: 'en', to: appLanguageCode);
-
-    final img = await getImageByDom(engWord);
-
-    final word = Word(
-      language: languageCodeToLearn,
-      word: {
-        Language.appLanguageCode:
-            ref.read(newAppLangWordProvider.notifier).state,
-        Language.languageCodeToLearn:
-            ref.read(newLangToLearnWordProvider.notifier).state,
-        Language.english: ref.read(newEnglishWordProvider.notifier).state,
-      },
-      sentence: {
-        Language.appLanguageCode: secondLangSentence.text,
-        Language.languageCodeToLearn: firstLangSentence.text,
-        Language.english: engSentence,
-      },
-      image: img,
-    );
-    SQLHelper.createWord(word);
-
-    _refreshWords(languageCodeToLearn);
-    _firstController.clear();
-    _secondController.clear();
-    FocusScope.of(context).unfocus();
-  }
-}
-
-class KoreanTextField extends StatelessWidget {
-  const KoreanTextField(
-      {super.key,
-      required TextEditingController firstController,
-      required FocusNode firstFocusNode,
-      required this.ref,
-      required TextEditingController secondController,
-      required FocusNode secondFocusNode,
-      required String languageCodeToLearn,
-      required String appLanguageCode})
-      : _firstController = firstController,
-        _firstFocusNode = firstFocusNode,
-        _secondController = secondController,
-        _secondFocusNode = secondFocusNode,
-        _languageCodeToLearn = languageCodeToLearn,
-        _appLanguageCode = appLanguageCode;
-
-  final TextEditingController _firstController;
-  final FocusNode _firstFocusNode;
-  final WidgetRef ref;
-  final TextEditingController _secondController;
-  final FocusNode _secondFocusNode;
-  final String _languageCodeToLearn;
-  final String _appLanguageCode;
-
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: _firstController,
-      focusNode: _firstFocusNode,
-      decoration: InputDecoration(
-          border: const OutlineInputBorder(),
-          labelText: L10n.getLanguageName(context, _languageCodeToLearn)),
-      onChanged: (value) {
-        ref.read(newLangToLearnWordProvider.notifier).state = value;
-      },
-      onEditingComplete: () async {
-        final kWord = ref.read(newLangToLearnWordProvider.notifier).state;
-        final translator = GoogleTranslator();
-        final secLangTranslation = await translator.translate(kWord,
-            from: _languageCodeToLearn, to: _appLanguageCode);
-        final engTranslation = await translator.translate(kWord,
-            from: _languageCodeToLearn, to: 'en');
-        ref.read(newEnglishWordProvider.notifier).state = engTranslation.text;
+    final appLanguageCode = AppLocalizations.of(context)!.languageCode;
+    print('appLanguageCode: $appLanguageCode');
 
-        ref.read(newAppLangWordProvider.notifier).state =
-            secLangTranslation.text;
-        _secondController.text = secLangTranslation.text;
-        print('translation: ${secLangTranslation.text}');
+    return Scaffold(
+      body: NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          if (notification is ScrollStartNotification) {
+            // The user started scrolling, unfocus any text fields to dismiss the keyboard.
+            FocusScope.of(context).unfocus();
+          }
+          return false; // Return false to allow other listeners to process the notification.
+        },
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              centerTitle: true,
+              pinned: true,
+              expandedHeight: 100,
+              backgroundColor: Color.fromARGB(255, 196, 234, 244),
+              actions: [
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          Icons.star,
+                          color: !isFavorite ? Colors.yellow : Colors.grey[400],
+                        ),
+                        onPressed: () async {
+                          if (isFavorite) {
+                            print('isFavoritePage: $isFavorite');
+                            await _refreshFavoritesWords();
+                          } else {
+                            setState(() {
+                              isFavorite = true;
+                            });
+                            _refreshWords(languageCodeToLearn);
+                          }
+                        },
+                      ),
+                      const Text(
+                        'Words',
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      UserLanguagePickerWidget(
+                        isChangeLang: true,
+                        func: refreshWordsCallback,
+                        setUserLanguageToLearn: setUserLanguageToLearn,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              bottom: Tab(
+                height: 80,
+                child: CustomSearchBar(
+                  refreshWordsCallback: refreshWordsCallback,
+                  labelText: AppLocalizations.of(context)!.search,
+                  languageCodeToLearn: languageCodeToLearn,
+                ),
+              ),
+            ),
+            SliverAppBar(
+              floating: true,
+              pinned: true,
+              expandedHeight: 100,
+              backgroundColor: Color.fromARGB(255, 196, 234, 244),
+              flexibleSpace: AddWord(
+                languageCodeToLearn: languageCodeToLearn,
+                refreshWordsCallback: refreshWordsCallback,
+                manageDownloadImage: manageDownloadImage,
+              ),
+            ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  print('isFavoriteWord: ${_words[index].isFavorite}');
 
-        // Move the focus to the second TextField when "Enter" is pressed.
-        FocusScope.of(context).requestFocus(_secondFocusNode);
-      },
+                  return WordCard(
+                    word: _words[index],
+                    callback: refreshWordsCallback,
+                    manageDownloadImage: manageDownloadImage,
+                    starColor: _words[index].isFavorite
+                        ? Colors.yellow[700]!
+                        : Colors.grey[400]!,
+                  );
+                },
+                childCount: _words.length,
+              ),
+            ),
+            // Expanded(
+            //   child: ListView.builder(
+            //     itemCount: _words.length,
+            //     itemBuilder: (BuildContext context, int index) {
+            //       return WordCard(
+            //         word: _words[index],
+            //         callback: refreshWordsCallback,
+            //       );
+            //     },
+            //   ),
+            // ),
+          ],
+        ),
+      ),
     );
   }
 }
+
+// class CustomSliverAppBarDelegate extends SliverPersistentHeaderDelegate {
+//   final double expandedHeight;
+//   final Function(String, {String term}) refreshWordsCallback;
+//   final Function() setUserLanguageToLearn;
+//   final String languageCodeToLearn;
+
+//   CustomSliverAppBarDelegate({
+//     required this.expandedHeight,
+//     required this.refreshWordsCallback,
+//     required this.setUserLanguageToLearn,
+//     required this.languageCodeToLearn,
+//   });
+
+//   @override
+//   Widget build(
+//       BuildContext context, double shrinkOffset, bool overlapsContent) {
+//     return Stack(
+//       fit: StackFit.expand,
+//       children: [
+//         buildOpen(shrinkOffset),
+//         buildClose(shrinkOffset),
+//       ],
+//     );
+//   }
+
+//   double appear(double shrinkOffset) => shrinkOffset / expandedHeight;
+
+//   double disappear(double shrinkOffset) => 1 - shrinkOffset / expandedHeight;
+
+//   Widget buildClose(double shrinkOffset) {
+//     return Opacity(
+//         opacity: appear(shrinkOffset),
+//         child: Column(
+//           children: [
+//             AppBar(
+//               actions: [
+//                 UserLanguagePickerWidget(
+//                   isChangeLang: true,
+//                   func: refreshWordsCallback,
+//                   setUserLanguageToLearn: setUserLanguageToLearn,
+//                 ),
+//               ],
+//               title: const Text(
+//                 'Words',
+//                 style: TextStyle(
+//                   fontSize: 26,
+//                   fontWeight: FontWeight.bold,
+//                   color: Colors.black,
+//                 ),
+//               ),
+//               bottom: Tab(
+//                 height: 80,
+//                 child: CustomSearchBar(
+//                   refreshWordsCallback: refreshWordsCallback,
+//                 ),
+//               ),
+//             ),
+//           ],
+//         ));
+//   }
+
+//   Widget buildOpen(double shrinkOffset) {
+//     return Opacity(
+//       opacity: disappear(shrinkOffset),
+//       child: Column(
+//         children: [
+//           AppBar(
+//             actions: [
+//               UserLanguagePickerWidget(
+//                 isChangeLang: true,
+//                 func: refreshWordsCallback,
+//                 setUserLanguageToLearn: setUserLanguageToLearn,
+//               ),
+//             ],
+//             title: const Text(
+//               'Words',
+//               style: TextStyle(
+//                 fontSize: 26,
+//                 fontWeight: FontWeight.bold,
+//                 color: Colors.black,
+//               ),
+//             ),
+//             bottom: Tab(
+//               height: 80,
+//               child: CustomSearchBar(
+//                 refreshWordsCallback: refreshWordsCallback,
+//               ),
+//             ),
+//           ),
+//           AddWord(
+//             languageCodeToLearn: languageCodeToLearn,
+//             refreshWordsCallback: refreshWordsCallback,
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   @override
+//   double get maxExtent => expandedHeight;
+
+//   @override
+//   double get minExtent => 140;
+
+//   @override
+//   bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
+//     return true;
+//   }
+// }

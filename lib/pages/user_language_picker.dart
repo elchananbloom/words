@@ -92,72 +92,7 @@ class _LanguagePickerWidgetState
             showDialog(
               context: context,
               builder: (_) {
-                return AlertDialog(
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.chooseLanguage,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      AddLanguagePickerWidget(
-                        setSelectedLanguage: setSelectedLanguage,
-                        // langProvider: languageCodeToLearnProvider,
-                        // isAppLang: false,
-                        // isChangeLang: false,
-                        // isWithCountry: true,
-                      ),
-                      const SizedBox(height: 40),
-                      ElevatedButton(
-                        onPressed: () {
-                          // final userLanguageToLearn = ref
-                          //     .read(languageCodeToLearnProvider.notifier)
-                          //     .state;
-                          // final oldUser = ref.read(userProvider).asData!.value;
-
-                          if (selectLanguage != null && selectLanguage != '') {
-                            SQLHelper.createLanguage(selectLanguage!);
-
-                            // userLanguageToLearn = newLangCode;
-                            SharedPreferences.getInstance().then((prefs) {
-                              prefs.setString(
-                                  'userLanguageToLearn', selectLanguage!);
-                            });
-                            getLanguages();
-                            widget.setUserLanguageToLearn();
-                            widget.func!(selectLanguage);
-                            setState(() {
-                              print('in setState');
-                              flag = L10n.getFlag(selectLanguage!);
-                            });
-                            Navigator.of(context).pop();
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          // primary: Colors.cyan,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 40, vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30.0),
-                          ),
-                        ),
-                        child: Text(
-                          AppLocalizations.of(context)!.continueText,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
+                return addLanguageWidget(context);
               },
               barrierDismissible: true,
             );
@@ -202,5 +137,74 @@ class _LanguagePickerWidgetState
         }).toList(),
       ),
     );
+  }
+
+  AlertDialog addLanguageWidget(BuildContext context) {
+    return AlertDialog(
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.chooseLanguage,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    AddLanguagePickerWidget(
+                      setSelectedLanguage: setSelectedLanguage,
+                      // langProvider: languageCodeToLearnProvider,
+                      // isAppLang: false,
+                      // isChangeLang: false,
+                      // isWithCountry: true,
+                    ),
+                    const SizedBox(height: 40),
+                    ElevatedButton(
+                      onPressed: () {
+                        // final userLanguageToLearn = ref
+                        //     .read(languageCodeToLearnProvider.notifier)
+                        //     .state;
+                        // final oldUser = ref.read(userProvider).asData!.value;
+
+                        if (selectLanguage != null && selectLanguage != '') {
+                          SQLHelper.createLanguage(selectLanguage!);
+
+                          // userLanguageToLearn = newLangCode;
+                          SharedPreferences.getInstance().then((prefs) {
+                            prefs.setString(
+                                'userLanguageToLearn', selectLanguage!);
+                          });
+                          getLanguages();
+                          widget.setUserLanguageToLearn();
+                          widget.func!(selectLanguage);
+                          setState(() {
+                            print('in setState');
+                            flag = L10n.getFlag(selectLanguage!);
+                          });
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        // primary: Colors.cyan,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 40, vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30.0),
+                        ),
+                      ),
+                      child: Text(
+                        AppLocalizations.of(context)!.continueText,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
   }
 }

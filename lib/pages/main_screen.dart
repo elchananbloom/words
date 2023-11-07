@@ -50,6 +50,7 @@ class MainScreen extends riverpod.ConsumerWidget {
           }
 
           return MaterialApp(
+            debugShowCheckedModeBanner: false,
             title: 'Words',
             theme: ThemeData(
               primarySwatch: Colors.blue,

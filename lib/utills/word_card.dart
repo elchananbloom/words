@@ -1,22 +1,43 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:words/db/sql_helper.dart';
 import 'package:words/models/word/word.dart';
 import 'package:words/models/enums.dart';
 import 'package:words/pages/word_screen.dart';
+import 'package:favorite_button/favorite_button.dart';
 
-class WordCard extends StatelessWidget {
-  const WordCard({Key? key, required this.word, required this.callback})
-      : super(key: key);
+class WordCard extends StatefulWidget {
+  WordCard({
+    Key? key,
+    required this.word,
+    required this.callback,
+    required this.manageDownloadImage,
+    required this.starColor,
+  }) : super(key: key);
 
   final Word word;
-  final Function callback;
+  final Function(String, {String term}) callback;
+  final Future<String> Function(String, bool) manageDownloadImage;
+  Color starColor;
+
+  @override
+  _WordCardState createState() => _WordCardState();
+}
+
+class _WordCardState extends State<WordCard> {
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     final card = Card(
-      key: word.id == null ? null : Key(word.id.toString()),
+      key: widget.word.id == null ? null : Key(widget.word.id.toString()),
       color: Color(0xFF88EDE7),
       elevation: 4,
-      
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
@@ -25,45 +46,72 @@ class WordCard extends StatelessWidget {
         onTap: () {
           showModalBottomSheet(
             context: context,
-            shape: const RoundedRectangleBorder(
-              // <-- SEE HERE
-              borderRadius: BorderRadius.vertical(
-                top: Radius.circular(25.0),
-              ),
-            ),
+            elevation: 5,
+            isScrollControlled: true,
+            // showDragHandle: true,
+            // backgroundColor: Colors.transparent,
+            // shape: const RoundedRectangleBorder(
+            //   // <-- SEE HERE
+            //   borderRadius: BorderRadius.vertical(
+            //     top: Radius.circular(25.0),
+            //   ),
+            // ),
             builder: (BuildContext context) {
-              return WordScreen(word: word, callback: callback);
+              return WordScreen(
+                word: widget.word,
+                callback: widget.callback,
+                manageDownloadImage: widget.manageDownloadImage,
+              );
             },
           );
         },
         leading: FittedBox(
           child: CircleAvatar(
             radius: 40,
-
-            backgroundImage: Image.network(word.image!).image,
+            backgroundImage:
+                Image.memory(File(widget.word.image!).readAsBytesSync()).image,
           ),
         ),
         title: Text(
-          word.word![Language.languageCodeToLearn]!,
+          widget.word.word![Language.languageCodeToLearn]!,
           style: const TextStyle(
             color: Colors.black,
             fontSize: 20,
             fontFamily: 'Roboto',
             fontWeight: FontWeight.bold,
             letterSpacing: 0.50,
-
           ),
         ),
         subtitle: Text(
-          word.word![Language.appLanguageCode]!,
+          widget.word.word![Language.appLanguageCode]!,
           style: const TextStyle(
             color: Colors.black,
             fontSize: 20,
             fontFamily: 'Roboto',
-
           ),
         ),
-      )
+        trailing: IconButton(
+          icon: Icon(
+            Icons.star,
+            color: widget.starColor,
+          ),
+          onPressed: () {
+            if (!widget.word.isFavorite) {
+              setState(() {
+                widget.starColor = Colors.yellow[700]!;
+              });
+              widget.word.isFavorite = true;
+              SQLHelper.updateWord(widget.word.id!, widget.word);
+            } else {
+              setState(() {
+                widget.starColor = Colors.grey[400]!;
+              });
+              widget.word.isFavorite = false;
+              SQLHelper.updateWord(widget.word.id!, widget.word);
+            }
+          },
+        ),
+      ),
     );
     return card;
     // return Container(

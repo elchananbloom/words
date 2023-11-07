@@ -11,6 +11,11 @@
     "continueText": "המשך",
     "welcomeToWords": "ברוכים הבאים למילים!",
     "selectLanguage": "בחר שפה",
+    "updateWord": "עדכן מילה",
+    "wordDeleted": "מילה {word} נמחקה",
+    "wordUpdated": "מילה {word} עודכנה",
+    "selectImage": "בחר תמונה שמתארת את המילה",
+    "cancel": "ביטול",
     "image": "תמונה"
 
 
