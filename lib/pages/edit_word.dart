@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:translator/translator.dart';
 import 'package:words/db/sql_helper.dart';
 import 'package:words/l10n.dart';
 import 'package:words/models/enums.dart';
@@ -57,7 +58,8 @@ class _EditWordState extends State<EditWord> {
       _image = Image.file(File(widget.word.image!));
       wordLanguageToLearnSentence =
           widget.word.sentence![Language.languageCodeToLearn]!;
-      wordAppLanguageSentence = widget.word.sentence![Language.appLanguageCode]!;
+      wordAppLanguageSentence =
+          widget.word.sentence![Language.appLanguageCode]!;
       isLanguageToLearnRTL =
           intl.Bidi.detectRtlDirectionality(wordLanguageToLearnSentence);
       isAppLanguageRTL =
@@ -98,141 +100,225 @@ class _EditWordState extends State<EditWord> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(
-        top: 15,
-        left: 15,
-        right: 15,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 120,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          GestureDetector(
-            onTap: () async {
-              await widget.manageDownloadImage(
-                  widget.word.word![Language.english]!, true);
-              var file = await File(widget.word.image!).readAsBytes();
-              setState(() {
-                imageCache.clear();
-                _image = Image.memory(file);
-              });
-            },
-            child: Center(
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          15,
+          15,
+          15,
+          MediaQuery.of(context).viewInsets.bottom + 120,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            GestureDetector(
+              onTap: () async {
+                await widget.manageDownloadImage(
+                    widget.word.word![Language.english]!, true);
+                var file = await File(widget.word.image!).readAsBytes();
+                setState(() {
+                  imageCache.clear();
+                  _image = Image.memory(file);
+                });
+              },
               child: Container(
                 height: 200,
+                width: double.infinity,
                 decoration: BoxDecoration(
                   border: Border.all(
                     width: 1,
-                    color: Colors.grey,
+                    // color: Colors.grey,
                   ),
                   borderRadius: BorderRadius.circular(10),
                   image: DecorationImage(
                     image: _image!.image,
                     fit: BoxFit.cover,
                     colorFilter: ColorFilter.mode(
-                      Colors.black.withOpacity(0.5),
+                      Colors.black.withOpacity(0.6),
                       BlendMode.dstATop,
                     ),
                   ),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(40.0),
-                  child: Image.asset(
-                    'lib/assets/images/image-editing.png',
-                    fit: BoxFit.cover,
+                child: const Padding(
+                  padding: EdgeInsets.all(40.0),
+                  child: ImageIcon(
+                    AssetImage('lib/assets/images/image-editing.png'),
+                    size: 48,
+                    color: Colors.black,
                   ),
                 ),
+                // Image.asset(
+                //   'lib/assets/images/image-editing.png',
+                //   fit: BoxFit.cover,
+                // ),
               ),
             ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          TextField(
-            controller: _firstWordController,
-            decoration: InputDecoration(
-              labelText:
-                  L10n.getLanguageName(context, widget.languageCodeToLearn),
-              border: const OutlineInputBorder(),
+            const SizedBox(
+              height: 10,
             ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          TextField(
-            controller: _secondWordController,
-            decoration: InputDecoration(
-              labelText: L10n.getLanguageName(context, widget.appLanguageCode),
-              border: const OutlineInputBorder(),
+            TextField(
+              controller: _firstWordController,
+              decoration: InputDecoration(
+                labelText:
+                    L10n.getLanguageName(context, widget.languageCodeToLearn),
+                // border: const OutlineInputBorder(),
+              ),
             ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          TextField(
-            controller: _firstSentenceController,
-            decoration: InputDecoration(
-              labelText: AppLocalizations.of(context)!.sentenceInLanguage(
-                  L10n.getLanguageName(context, widget.languageCodeToLearn)),
-              border: const OutlineInputBorder(),
+            const SizedBox(
+              height: 10,
             ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          TextField(
-            controller: _secondSentenceController,
-            decoration: InputDecoration(
-              labelText: AppLocalizations.of(context)!.sentenceInLanguage(
-                  L10n.getLanguageName(context, widget.appLanguageCode)),
-              border: const OutlineInputBorder(),
+            TextField(
+              controller: _secondWordController,
+              decoration: InputDecoration(
+                labelText:
+                    L10n.getLanguageName(context, widget.appLanguageCode),
+                // border: const OutlineInputBorder(),
+              ),
             ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              if (widget.id != null) {
-                print('id: $widget.id');
-                await _updateWord(widget.id!, widget.word);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      AppLocalizations.of(context)!.wordUpdated(
-                          widget.word.word![Language.appLanguageCode]!),
+            const SizedBox(
+              height: 10,
+            ),
+            // width: 300,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _firstSentenceController,
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!
+                          .sentenceInLanguage(L10n.getLanguageName(
+                              context, widget.languageCodeToLearn)),
+                      // border: const OutlineInputBorder(),
+                      suffixIcon: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 4),
+                        child: ElevatedButton(
+                          onPressed: translateToAppLanguage,
+                          child: Text(
+                            AppLocalizations.of(context)!.translateTo(
+                                L10n.getLanguageName(
+                                    context, widget.appLanguageCode)),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                );
-              }
+                ),
+              ],
+            ),
 
-              _firstWordController.text = '';
-              _secondWordController.text = '';
-              _firstSentenceController.text = '';
-              _secondSentenceController.text = '';
-              _imageController.text = '';
-              Navigator.of(context).pop();
-            },
-            child: Text(AppLocalizations.of(context)!.updateWord),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              _firstWordController.text = '';
-              _secondWordController.text = '';
-              _firstSentenceController.text = '';
-              _secondSentenceController.text = '';
-              _imageController.text = '';
-              widget.callback(widget.languageCodeToLearn);
+            const SizedBox(
+              height: 10,
+            ),
+            // Container(
+            //   width: 300,
+            //   child:
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _secondSentenceController,
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!
+                          .sentenceInLanguage(L10n.getLanguageName(
+                              context, widget.appLanguageCode)),
+                      // border: const OutlineInputBorder(),
+                      suffixIcon: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 4),
+                        child: ElevatedButton(
+                          onPressed: translateToLanguageToLearn,
+                          child: Text(
+                            AppLocalizations.of(context)!.translateTo(
+                                L10n.getLanguageName(
+                                    context, widget.languageCodeToLearn)),
+                          ),
+                          
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            // ),
+            const SizedBox(
+              height: 20,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
-              Navigator.of(context).pop();
-            },
-            child: Text(AppLocalizations.of(context)!.cancel),
-          ),
-        ],
+              children: [
+               
+                ElevatedButton(
+                  onPressed: () {
+                    _firstWordController.text = '';
+                    _secondWordController.text = '';
+                    _firstSentenceController.text = '';
+                    _secondSentenceController.text = '';
+                    _imageController.text = '';
+                    widget.callback(widget.languageCodeToLearn);
+
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(AppLocalizations.of(context)!.cancel),
+                  style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                                Theme.of(context).colorScheme.error),
+                            ),
+                ),
+                 ElevatedButton(
+                  onPressed: () async {
+                    if (widget.id != null) {
+                      await _updateWord(widget.id!, widget.word);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            AppLocalizations.of(context)!.wordUpdated(
+                                widget.word.word![Language.appLanguageCode]!),
+                          ),
+                        ),
+                      );
+                    }
+
+                    _firstWordController.text = '';
+                    _secondWordController.text = '';
+                    _firstSentenceController.text = '';
+                    _secondSentenceController.text = '';
+                    _imageController.text = '';
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(AppLocalizations.of(context)!.updateWord),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  void translateToLanguageToLearn() async {
+    final translator = GoogleTranslator();
+    var engTranslate =
+        await translator.translate(_secondSentenceController.text, to: 'en');
+    var firstTranslate = await translator.translate(engTranslate.text,
+        to: widget.languageCodeToLearn);
+    _firstSentenceController.text = firstTranslate.text;
+  }
+
+  void translateToAppLanguage() async {
+    final translator = GoogleTranslator();
+    var engTranslate =
+        await translator.translate(_firstSentenceController.text, to: 'en');
+    var secondTranslate = await translator.translate(engTranslate.text,
+        to: widget.appLanguageCode);
+    _secondSentenceController.text = secondTranslate.text;
   }
 }

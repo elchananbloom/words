@@ -16,6 +16,9 @@
     "wordUpdated": "מילה {word} עודכנה",
     "selectImage": "בחר תמונה שמתארת את המילה",
     "cancel": "ביטול",
+    "translateTo": "תרגם ל{language}",
+    "confirmDelete": "האם אתה בטוח שברצונך למחוק את המילה {word}?",
+    "delete": "מחק",
     "image": "תמונה"
 
 

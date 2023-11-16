@@ -164,10 +164,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: Colors.black,
+                          // color: Colors.black,
                           width: 1,
                         ),
-                        color: Colors.grey[200],
+                        // color: Colors.grey[200],
                         image: DecorationImage(
                           image: img.image,
                           fit: BoxFit.cover,
@@ -204,43 +204,43 @@ class _MyHomePageState extends State<MyHomePage> {
               centerTitle: true,
               pinned: true,
               expandedHeight: 100,
-              backgroundColor: Color.fromARGB(255, 196, 234, 244),
+              backgroundColor: Theme.of(context).primaryColor,
+              // backgroundColor: Color.fromARGB(255, 196, 234, 244),
               actions: [
                 Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          Icons.star,
-                          color: !isFavorite ? Colors.yellow : Colors.grey[400],
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            Icons.star,
+                            color: !isFavorite ? Colors.yellow : Colors.grey[400],
+                          ),
+                          onPressed: () async {
+                            if (isFavorite) {
+                              print('isFavoritePage: $isFavorite');
+                              await _refreshFavoritesWords();
+                            } else {
+                              setState(() {
+                                isFavorite = true;
+                              });
+                              _refreshWords(languageCodeToLearn);
+                            }
+                          },
                         ),
-                        onPressed: () async {
-                          if (isFavorite) {
-                            print('isFavoritePage: $isFavorite');
-                            await _refreshFavoritesWords();
-                          } else {
-                            setState(() {
-                              isFavorite = true;
-                            });
-                            _refreshWords(languageCodeToLearn);
-                          }
-                        },
-                      ),
-                      const Text(
-                        'Words',
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                        Text(
+                          'Words',
+                          style: Theme.of(context).textTheme.headlineLarge,
                         ),
-                      ),
-                      UserLanguagePickerWidget(
-                        isChangeLang: true,
-                        func: refreshWordsCallback,
-                        setUserLanguageToLearn: setUserLanguageToLearn,
-                      ),
-                    ],
+                        UserLanguagePickerWidget(
+                          isUserLanguagePicker: true,
+                          func: refreshWordsCallback,
+                          setUserLanguageToLearn: setUserLanguageToLearn,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -257,7 +257,8 @@ class _MyHomePageState extends State<MyHomePage> {
               floating: true,
               pinned: true,
               expandedHeight: 100,
-              backgroundColor: Color.fromARGB(255, 196, 234, 244),
+              backgroundColor: Theme.of(context).primaryColor,
+              // backgroundColor: Color.fromARGB(255, 196, 234, 244),
               flexibleSpace: AddWord(
                 languageCodeToLearn: languageCodeToLearn,
                 refreshWordsCallback: refreshWordsCallback,
@@ -281,17 +282,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 childCount: _words.length,
               ),
             ),
-            // Expanded(
-            //   child: ListView.builder(
-            //     itemCount: _words.length,
-            //     itemBuilder: (BuildContext context, int index) {
-            //       return WordCard(
-            //         word: _words[index],
-            //         callback: refreshWordsCallback,
-            //       );
-            //     },
-            //   ),
-            // ),
           ],
         ),
       ),
@@ -299,112 +289,3 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-// class CustomSliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-//   final double expandedHeight;
-//   final Function(String, {String term}) refreshWordsCallback;
-//   final Function() setUserLanguageToLearn;
-//   final String languageCodeToLearn;
-
-//   CustomSliverAppBarDelegate({
-//     required this.expandedHeight,
-//     required this.refreshWordsCallback,
-//     required this.setUserLanguageToLearn,
-//     required this.languageCodeToLearn,
-//   });
-
-//   @override
-//   Widget build(
-//       BuildContext context, double shrinkOffset, bool overlapsContent) {
-//     return Stack(
-//       fit: StackFit.expand,
-//       children: [
-//         buildOpen(shrinkOffset),
-//         buildClose(shrinkOffset),
-//       ],
-//     );
-//   }
-
-//   double appear(double shrinkOffset) => shrinkOffset / expandedHeight;
-
-//   double disappear(double shrinkOffset) => 1 - shrinkOffset / expandedHeight;
-
-//   Widget buildClose(double shrinkOffset) {
-//     return Opacity(
-//         opacity: appear(shrinkOffset),
-//         child: Column(
-//           children: [
-//             AppBar(
-//               actions: [
-//                 UserLanguagePickerWidget(
-//                   isChangeLang: true,
-//                   func: refreshWordsCallback,
-//                   setUserLanguageToLearn: setUserLanguageToLearn,
-//                 ),
-//               ],
-//               title: const Text(
-//                 'Words',
-//                 style: TextStyle(
-//                   fontSize: 26,
-//                   fontWeight: FontWeight.bold,
-//                   color: Colors.black,
-//                 ),
-//               ),
-//               bottom: Tab(
-//                 height: 80,
-//                 child: CustomSearchBar(
-//                   refreshWordsCallback: refreshWordsCallback,
-//                 ),
-//               ),
-//             ),
-//           ],
-//         ));
-//   }
-
-//   Widget buildOpen(double shrinkOffset) {
-//     return Opacity(
-//       opacity: disappear(shrinkOffset),
-//       child: Column(
-//         children: [
-//           AppBar(
-//             actions: [
-//               UserLanguagePickerWidget(
-//                 isChangeLang: true,
-//                 func: refreshWordsCallback,
-//                 setUserLanguageToLearn: setUserLanguageToLearn,
-//               ),
-//             ],
-//             title: const Text(
-//               'Words',
-//               style: TextStyle(
-//                 fontSize: 26,
-//                 fontWeight: FontWeight.bold,
-//                 color: Colors.black,
-//               ),
-//             ),
-//             bottom: Tab(
-//               height: 80,
-//               child: CustomSearchBar(
-//                 refreshWordsCallback: refreshWordsCallback,
-//               ),
-//             ),
-//           ),
-//           AddWord(
-//             languageCodeToLearn: languageCodeToLearn,
-//             refreshWordsCallback: refreshWordsCallback,
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-
-//   @override
-//   double get maxExtent => expandedHeight;
-
-//   @override
-//   double get minExtent => 140;
-
-//   @override
-//   bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
-//     return true;
-//   }
-// }

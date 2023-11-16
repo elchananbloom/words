@@ -29,7 +29,7 @@ class AddWord extends ConsumerStatefulWidget {
 
   final String languageCodeToLearn;
   final Function(String lang, {String term}) refreshWordsCallback;
-  final Future<String> Function(String word,bool isEdit) manageDownloadImage;
+  final Future<String> Function(String word, bool isEdit) manageDownloadImage;
 
   @override
   _AddWordState createState() => _AddWordState();
@@ -40,7 +40,6 @@ class _AddWordState extends ConsumerState<AddWord> {
   final FocusNode _secondFocusNode = FocusNode();
   final TextEditingController _firstController = TextEditingController();
   final TextEditingController _secondController = TextEditingController();
-  
 
   String removeDiacritics(String input) {
     return input.replaceAll(RegExp(r'[\u0591-\u05C7]'), '');
@@ -76,7 +75,7 @@ class _AddWordState extends ConsumerState<AddWord> {
     final secondLangSentence = await translator.translate(engSentence,
         from: 'en', to: appLanguageCode);
 
-    String filePathAndName = await widget.manageDownloadImage(engWord,false);
+    String filePathAndName = await widget.manageDownloadImage(engWord, false);
 
     final word = Word(
       language: languageCodeToLearn,
@@ -105,19 +104,9 @@ class _AddWordState extends ConsumerState<AddWord> {
     FocusScope.of(context).unfocus();
   }
 
-  
-
-
-
   InputDecoration getWordDecoration(String languageCode) {
     return InputDecoration(
-      border: const OutlineInputBorder(
-        borderRadius: BorderRadius.all(
-          Radius.circular(20),
-        ),
-      ),
       labelText: L10n.getLanguageName(context, languageCode),
-      labelStyle: TextStyle(color: Colors.grey[400], fontSize: 14)
     );
   }
 
@@ -146,19 +135,16 @@ class _AddWordState extends ConsumerState<AddWord> {
             SizedBox(
               width: 150,
               height: 30,
-              child: Directionality(
-                textDirection: TextDirection.rtl,
-                child: TextField(
-                  controller: _firstController,
-                  focusNode: _firstFocusNode,
-                  decoration: getWordDecoration(widget.languageCodeToLearn),
-                  onChanged: (value) {
-                    ref.read(newLangToLearnWordProvider.notifier).state = value;
-                  },
-                  onEditingComplete: () async {
-                    await onEditingCompleteFirstLanguage(appLanguageCode);
-                  },
-                ),
+              child: TextField(
+                controller: _firstController,
+                focusNode: _firstFocusNode,
+                decoration: getWordDecoration(widget.languageCodeToLearn),
+                onChanged: (value) {
+                  ref.read(newLangToLearnWordProvider.notifier).state = value;
+                },
+                onEditingComplete: () async {
+                  await onEditingCompleteFirstLanguage(appLanguageCode);
+                },
               ),
             ),
             const SizedBox(
@@ -168,19 +154,16 @@ class _AddWordState extends ConsumerState<AddWord> {
             SizedBox(
               width: 150,
               height: 30,
-              child: Directionality(
-                textDirection: TextDirection.rtl,
-                child: TextField(
-                  controller: _secondController,
-                  focusNode: _secondFocusNode,
-                  decoration: getWordDecoration(appLanguageCode),
-                  onChanged: (value) {
-                    ref.read(newAppLangWordProvider.notifier).state = value;
-                  },
-                  onEditingComplete: () async {
-                    await onEditingCompleteSecondLanguage(appLanguageCode);
-                  },
-                ),
+              child: TextField(
+                controller: _secondController,
+                focusNode: _secondFocusNode,
+                decoration: getWordDecoration(appLanguageCode),
+                onChanged: (value) {
+                  ref.read(newAppLangWordProvider.notifier).state = value;
+                },
+                onEditingComplete: () async {
+                  await onEditingCompleteSecondLanguage(appLanguageCode);
+                },
               ),
             ),
           ],
@@ -191,19 +174,14 @@ class _AddWordState extends ConsumerState<AddWord> {
         SizedBox(
           width: 150,
           height: 30,
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: ElevatedButton(
-              onPressed: () {
-                handleAddWord(appLanguageCode);
-              },
-              style: ElevatedButton.styleFrom(
-                primary: Colors.cyan,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: Text(AppLocalizations.of(context)!.addWord),
+          child: ElevatedButton(
+            onPressed: () {
+              handleAddWord(appLanguageCode);
+            },
+            style: Theme.of(context).elevatedButtonTheme.style,
+            child: Text(
+              AppLocalizations.of(context)!.addWord,
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
           ),
         ),
@@ -260,34 +238,3 @@ class _AddWordState extends ConsumerState<AddWord> {
     }
   }
 }
-
-// class KoreanTextField extends StatelessWidget {
-//   const KoreanTextField(
-//       {super.key,
-//       required TextEditingController firstController,
-//       required FocusNode firstFocusNode,
-//       required this.ref,
-//       required TextEditingController secondController,
-//       required FocusNode secondFocusNode,
-//       required String languageCodeToLearn,
-//       required String appLanguageCode})
-//       : _firstController = firstController,
-//         _firstFocusNode = firstFocusNode,
-//         _secondController = secondController,
-//         _secondFocusNode = secondFocusNode,
-//         _languageCodeToLearn = languageCodeToLearn,
-//         _appLanguageCode = appLanguageCode;
-
-//   final TextEditingController _firstController;
-//   final FocusNode _firstFocusNode;
-//   final WidgetRef ref;
-//   final TextEditingController _secondController;
-//   final FocusNode _secondFocusNode;
-//   final String _languageCodeToLearn;
-//   final String _appLanguageCode;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return;
-//   }
-// }

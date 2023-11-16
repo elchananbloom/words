@@ -16,6 +16,9 @@
     "wordUpdated": "단어가 {word} 업데이트되었습니다",
     "selectImage": "이미지 선택",
     "cancel": "취소",
+    "translateTo": "{language}로 번역",
+    "confirmDelete": "{word} 단어를 삭제하시겠습니까?",
+    "delete": "삭제",
     "image": "이미지"
 
 }

@@ -5,7 +5,6 @@ import 'package:words/db/sql_helper.dart';
 import 'package:words/models/word/word.dart';
 import 'package:words/models/enums.dart';
 import 'package:words/pages/word_screen.dart';
-import 'package:favorite_button/favorite_button.dart';
 
 class WordCard extends StatefulWidget {
   WordCard({
@@ -26,7 +25,6 @@ class WordCard extends StatefulWidget {
 }
 
 class _WordCardState extends State<WordCard> {
-
   @override
   void initState() {
     super.initState();
@@ -36,26 +34,15 @@ class _WordCardState extends State<WordCard> {
   Widget build(BuildContext context) {
     final card = Card(
       key: widget.word.id == null ? null : Key(widget.word.id.toString()),
-      color: Color(0xFF88EDE7),
+      // color: Color(0xFF88EDE7),
       elevation: 4,
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
       child: ListTile(
         onTap: () {
           showModalBottomSheet(
             context: context,
             elevation: 5,
             isScrollControlled: true,
-            // showDragHandle: true,
-            // backgroundColor: Colors.transparent,
-            // shape: const RoundedRectangleBorder(
-            //   // <-- SEE HERE
-            //   borderRadius: BorderRadius.vertical(
-            //     top: Radius.circular(25.0),
-            //   ),
-            // ),
             builder: (BuildContext context) {
               return WordScreen(
                 word: widget.word,
@@ -65,30 +52,28 @@ class _WordCardState extends State<WordCard> {
             },
           );
         },
-        leading: FittedBox(
-          child: CircleAvatar(
-            radius: 40,
-            backgroundImage:
-                Image.memory(File(widget.word.image!).readAsBytesSync()).image,
+        leading: Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle, // This makes the Container a circle
+            border: Border.all(
+              color: Colors.red, // You can change the border color
+              width: 1.0, // You can adjust the border width
+            ),
+          ),
+          child: FittedBox(
+            child: CircleAvatar(
+              radius: 40,
+              backgroundImage:
+                  Image.memory(File(widget.word.image!).readAsBytesSync())
+                      .image,
+            ),
           ),
         ),
         title: Text(
           widget.word.word![Language.languageCodeToLearn]!,
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontFamily: 'Roboto',
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.50,
-          ),
         ),
         subtitle: Text(
           widget.word.word![Language.appLanguageCode]!,
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontFamily: 'Roboto',
-          ),
         ),
         trailing: IconButton(
           icon: Icon(

@@ -17,14 +17,12 @@ class CustomInputDecoration extends InputDecoration {
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(50),
           ),
-          labelText:
-              labelText,
-          labelStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+          labelText: labelText,
           prefixIcon: IconButton(
             onPressed: handleSearch,
             icon: const Icon(
               Icons.search,
-              color: Colors.black,
+              // color: Colors.black,
               size: 20,
             ),
           ),
@@ -38,7 +36,7 @@ class CustomInputDecoration extends InputDecoration {
           onPressed: handleClose,
           icon: const Icon(
             Icons.clear,
-            color: Colors.black,
+            // color: Colors.black,
             size: 20,
           ),
         ),

@@ -93,6 +93,28 @@
     "@cancel": {
         "description": "cancel"
     },
+    "confirmDelete": "Are you sure you want to delete the word {word}?",
+    "@confirmDelete": {
+        "description": "confirm delete",
+        "placeholders": {
+            "word": {
+                "type": "String"
+            }
+        }
+    },
+    "delete": "Delete",
+    "@delete": {
+        "description": "delete"
+    },
+    "translateTo": "Translate to {language}",
+    "@translateTo": {
+        "description": "translate to language",
+        "placeholders": {
+            "language": {
+                "type": "String"
+            }
+        }
+    },
     "image": "Image",
     "@image": {
         "description": "the image"

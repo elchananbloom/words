@@ -16,7 +16,7 @@ class SelectLanguage extends riverpod.ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return Scaffold(
-      backgroundColor: Colors.blue,
+      // backgroundColor: Colors.blue,
       body: Center(
         child: Card(
           shape: RoundedRectangleBorder(
@@ -41,7 +41,7 @@ class SelectLanguage extends riverpod.ConsumerWidget {
                   style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    // color: Colors.black,
                   ),
                 ),
                 const SizedBox(height: 30),
@@ -52,7 +52,7 @@ class SelectLanguage extends riverpod.ConsumerWidget {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    // color: Colors.black,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -70,11 +70,11 @@ class SelectLanguage extends riverpod.ConsumerWidget {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    // color: Colors.black,
                   ),
                 ),
                 const SizedBox(height: 20),
-                AppLanguagePickerWidget(
+                const AppLanguagePickerWidget(
                   // langProvider: secondLangProvider,
                   // isAppLang: true,
                   // isChangeLang: false,
@@ -133,7 +133,7 @@ class SelectLanguage extends riverpod.ConsumerWidget {
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      // color: Colors.white,
                     ),
                   ),
                 ),

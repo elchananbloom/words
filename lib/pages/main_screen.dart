@@ -5,6 +5,7 @@ import 'package:words/pages/app_localization_singleton.dart';
 import 'package:words/pages/my_home.dart';
 // import 'package:words/pages/my_home.dart';
 import 'package:words/pages/select_language.dart';
+import 'package:words/pages/theme.dart';
 import 'package:words/providers/new_word.dart';
 import 'package:words/providers/locale_provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -52,9 +53,7 @@ class MainScreen extends riverpod.ConsumerWidget {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             title: 'Words',
-            theme: ThemeData(
-              primarySwatch: Colors.blue,
-            ),
+            theme: MyThemeData.lightTheme,
             locale: locale,
             supportedLocales: L10n.supportedLanguages,
             localizationsDelegates: const [
