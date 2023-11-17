@@ -71,6 +71,16 @@ class SQLHelper {
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
   }
 
+  static Future<int> deleteLanguage(String lang) async {
+    final db = await SQLHelper.db();
+
+    return db.delete(
+      'languages',
+      where: 'language = ?',
+      whereArgs: [lang],
+    );
+  }
+
   static Future<int> createWord(Word word) async {
     final db = await SQLHelper.db();
 

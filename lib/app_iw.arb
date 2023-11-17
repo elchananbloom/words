@@ -18,6 +18,7 @@
     "cancel": "ביטול",
     "translateTo": "תרגם ל{language}",
     "confirmDelete": "האם אתה בטוח שברצונך למחוק את המילה {word}?",
+    "deleteLanguageConfirmation": "האם אתה בטוח שברצונך למחוק את השפה {language}?",
     "delete": "מחק",
     "image": "תמונה"
 

@@ -24,12 +24,14 @@ class AddWord extends ConsumerStatefulWidget {
       {required this.languageCodeToLearn,
       required this.refreshWordsCallback,
       required this.manageDownloadImage,
+      required this.handleIsLoading,
       Key? key})
       : super(key: key);
 
   final String languageCodeToLearn;
   final Function(String lang, {String term}) refreshWordsCallback;
   final Future<String> Function(String word, bool isEdit) manageDownloadImage;
+  final Function(bool isLoading) handleIsLoading;
 
   @override
   _AddWordState createState() => _AddWordState();
@@ -46,10 +48,11 @@ class _AddWordState extends ConsumerState<AddWord> {
   }
 
   void addWord(String languageCodeToLearn, String appLanguageCode) async {
-    final engWord = ref.read(newEnglishWordProvider.notifier).state;
+    final engWord = ref.read(newEnglishWordProvider.notifier).state.trim();
     final url =
         'https://context.reverso.net/translation/english-hebrew/$engWord';
 
+    widget.handleIsLoading(true);
     final chaleno = await Chaleno().load(url);
     List<Result> results = chaleno!.getElementsByClassName('example');
 
@@ -81,14 +84,14 @@ class _AddWordState extends ConsumerState<AddWord> {
       language: languageCodeToLearn,
       word: {
         Language.appLanguageCode:
-            removeDiacritics(ref.read(newAppLangWordProvider.notifier).state),
+            removeDiacritics(ref.read(newAppLangWordProvider.notifier).state).trim(),
         Language.languageCodeToLearn: removeDiacritics(
-            ref.read(newLangToLearnWordProvider.notifier).state),
+            ref.read(newLangToLearnWordProvider.notifier).state).trim(),
         Language.english: engWord,
       },
       sentence: {
-        Language.appLanguageCode: removeDiacritics(secondLangSentence.text),
-        Language.languageCodeToLearn: removeDiacritics(firstLangSentence.text),
+        Language.appLanguageCode: removeDiacritics(secondLangSentence.text).trim(),
+        Language.languageCodeToLearn: removeDiacritics(firstLangSentence.text).trim(),
         Language.english: engSentence,
       },
       image: filePathAndName,
@@ -203,10 +206,12 @@ class _AddWordState extends ConsumerState<AddWord> {
     if (ref.read(newLangToLearnWordProvider.notifier).state == '') {
       final appLanguageWord = ref.read(newAppLangWordProvider.notifier).state;
       final translator = GoogleTranslator();
+      widget.handleIsLoading(true);
       final firstLangTranslation = await translator.translate(appLanguageWord,
           from: 'auto', to: widget.languageCodeToLearn);
       final engTranslation =
           await translator.translate(appLanguageWord, from: 'auto', to: 'en');
+      widget.handleIsLoading(false);
       ref.read(newLangToLearnWordProvider.notifier).state =
           removeDiacritics(firstLangTranslation.text);
       ref.read(newEnglishWordProvider.notifier).state = engTranslation.text;
@@ -222,10 +227,12 @@ class _AddWordState extends ConsumerState<AddWord> {
     if (ref.read(newAppLangWordProvider.notifier).state == '') {
       final wordToLearn = ref.read(newLangToLearnWordProvider.notifier).state;
       final translator = GoogleTranslator();
+      widget.handleIsLoading(true);
       final secLangTranslation = await translator.translate(wordToLearn,
           from: 'auto', to: appLanguageCode);
       final engTranslation =
           await translator.translate(wordToLearn, from: 'auto', to: 'en');
+      widget.handleIsLoading(false);
       ref.read(newEnglishWordProvider.notifier).state = engTranslation.text;
 
       ref.read(newAppLangWordProvider.notifier).state =

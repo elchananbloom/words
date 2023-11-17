@@ -106,6 +106,15 @@
     "@delete": {
         "description": "delete"
     },
+    "deleteLanguageConfirmation": "Are you sure you want to delete the language {language}?",
+    "@deleteLanguageConfirmation": {
+        "description": "delete language confirmation",
+        "placeholders": {
+            "language": {
+                "type": "String"
+            }
+        }
+    },
     "translateTo": "Translate to {language}",
     "@translateTo": {
         "description": "translate to language",

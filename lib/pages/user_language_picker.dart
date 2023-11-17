@@ -84,12 +84,53 @@ class _LanguagePickerWidgetState
 
             return DropdownMenuItem<String>(
               value: a(L10n.getFlag(valueItem)),
-              child: CircleAvatar(
-                radius: 20,
-                backgroundColor: Colors.white,
-                child: Text(
-                  L10n.getFlag(valueItem),
-                  style: Theme.of(context).textTheme.headlineMedium,
+              child: GestureDetector(
+                onLongPress: () {
+                  if (valueItem != '+' && valueItem != userLanguageToLearn) {
+                    showDialog(
+                      context: context,
+                      builder: (_) {
+                        return AlertDialog(
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                AppLocalizations.of(context)!
+                                    .deleteLanguageConfirmation(
+                                  L10n.getLanguageName(context, valueItem),
+                                ),
+                                style:
+                                    Theme.of(context).textTheme.headlineMedium,
+                              ),
+                              const SizedBox(height: 40),
+                              ElevatedButton(
+                                onPressed: () {
+                                  SQLHelper.deleteLanguage(valueItem);
+                                  getLanguages();
+                                  Navigator.of(context).pop();
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text(
+                                  AppLocalizations.of(context)!.delete,
+                                  style:
+                                      Theme.of(context).textTheme.headlineSmall,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      barrierDismissible: true,
+                    );
+                  }
+                },
+                child: CircleAvatar(
+                  radius: 20,
+                  backgroundColor: Colors.white,
+                  child: Text(
+                    L10n.getFlag(valueItem),
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
                 ),
               ),
             );

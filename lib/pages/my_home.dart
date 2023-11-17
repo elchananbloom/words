@@ -24,7 +24,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   List<Word> _words = [];
-  bool _isLouding = true;
+  bool _isLouding = false;
   // var user;
   String languageCodeToLearn = '';
   var isFavorite = true;
@@ -34,7 +34,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final data = await SQLHelper.getWordsBySearch(lang, query);
     setState(() {
       _words = data;
-      _isLouding = false;
+      // _isLouding = false;
     });
   }
 
@@ -47,11 +47,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
     setState(() {
       _words = data;
-      _isLouding = false;
+      // _isLouding = false;
       isFavorite = false;
     });
   }
-  
 
   @override
   void initState() {
@@ -65,6 +64,12 @@ class _MyHomePageState extends State<MyHomePage> {
         languageCodeToLearn = value;
         _refreshWords(languageCodeToLearn);
       });
+    });
+  }
+
+  void handleIsLoading(bool isLoading) {
+    setState(() {
+      _isLouding = isLoading;
     });
   }
 
@@ -84,6 +89,9 @@ class _MyHomePageState extends State<MyHomePage> {
     if (isEdit || !exists) {
       final img = await getImageByDom(engWord, isEdit);
       await downloadImage(img, engWord, filePathAndName);
+    }
+    else{
+      handleIsLoading(false);
     }
 
     return filePathAndName;
@@ -108,7 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
     PixabayResponse? pixabayResponse = await pixabayPicker.api!
         .requestImagesWithKeyword(
             keyword: word, category: "&orientation=horizontal");
-
+    handleIsLoading(false);
     // ignore: use_build_context_synchronously
     await selectImage(pixabayResponse!);
 
@@ -190,102 +198,110 @@ class _MyHomePageState extends State<MyHomePage> {
     print('appLanguageCode: $appLanguageCode');
 
     return Scaffold(
-      body: NotificationListener<ScrollNotification>(
-        onNotification: (notification) {
-          if (notification is ScrollStartNotification) {
-            // The user started scrolling, unfocus any text fields to dismiss the keyboard.
-            FocusScope.of(context).unfocus();
-          }
-          return false; // Return false to allow other listeners to process the notification.
-        },
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              centerTitle: true,
-              pinned: true,
-              expandedHeight: 100,
-              backgroundColor: Theme.of(context).primaryColor,
-              // backgroundColor: Color.fromARGB(255, 196, 234, 244),
-              actions: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        IconButton(
-                          icon: Icon(
-                            Icons.star,
-                            color: !isFavorite ? Colors.yellow : Colors.grey[400],
+      body: Stack(children: [
+        NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            if (notification is ScrollStartNotification) {
+              // The user started scrolling, unfocus any text fields to dismiss the keyboard.
+              FocusScope.of(context).unfocus();
+            }
+            return false; // Return false to allow other listeners to process the notification.
+          },
+          child: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                centerTitle: true,
+                pinned: true,
+                expandedHeight: 100,
+                backgroundColor: Theme.of(context).primaryColor,
+                // backgroundColor: Color.fromARGB(255, 196, 234, 244),
+                actions: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              Icons.star,
+                              color: !isFavorite
+                                  ? Colors.yellow
+                                  : Colors.grey[400],
+                            ),
+                            onPressed: () async {
+                              if (isFavorite) {
+                                print('isFavoritePage: $isFavorite');
+                                await _refreshFavoritesWords();
+                              } else {
+                                setState(() {
+                                  isFavorite = true;
+                                });
+                                _refreshWords(languageCodeToLearn);
+                              }
+                            },
                           ),
-                          onPressed: () async {
-                            if (isFavorite) {
-                              print('isFavoritePage: $isFavorite');
-                              await _refreshFavoritesWords();
-                            } else {
-                              setState(() {
-                                isFavorite = true;
-                              });
-                              _refreshWords(languageCodeToLearn);
-                            }
-                          },
-                        ),
-                        Text(
-                          'Words',
-                          style: Theme.of(context).textTheme.headlineLarge,
-                        ),
-                        UserLanguagePickerWidget(
-                          isUserLanguagePicker: true,
-                          func: refreshWordsCallback,
-                          setUserLanguageToLearn: setUserLanguageToLearn,
-                        ),
-                      ],
+                          Text(
+                            'Words',
+                            style: Theme.of(context).textTheme.headlineLarge,
+                          ),
+                          UserLanguagePickerWidget(
+                            isUserLanguagePicker: true,
+                            func: refreshWordsCallback,
+                            setUserLanguageToLearn: setUserLanguageToLearn,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
+                ],
+                bottom: Tab(
+                  height: 80,
+                  child: CustomSearchBar(
+                    refreshWordsCallback: refreshWordsCallback,
+                    labelText: AppLocalizations.of(context)!.search,
+                    languageCodeToLearn: languageCodeToLearn,
+                  ),
                 ),
-              ],
-              bottom: Tab(
-                height: 80,
-                child: CustomSearchBar(
-                  refreshWordsCallback: refreshWordsCallback,
-                  labelText: AppLocalizations.of(context)!.search,
+              ),
+              SliverAppBar(
+                floating: true,
+                pinned: true,
+                expandedHeight: 100,
+                backgroundColor: Theme.of(context).primaryColor,
+                // backgroundColor: Color.fromARGB(255, 196, 234, 244),
+                flexibleSpace: AddWord(
                   languageCodeToLearn: languageCodeToLearn,
+                  refreshWordsCallback: refreshWordsCallback,
+                  manageDownloadImage: manageDownloadImage,
+                  handleIsLoading: handleIsLoading,
                 ),
               ),
-            ),
-            SliverAppBar(
-              floating: true,
-              pinned: true,
-              expandedHeight: 100,
-              backgroundColor: Theme.of(context).primaryColor,
-              // backgroundColor: Color.fromARGB(255, 196, 234, 244),
-              flexibleSpace: AddWord(
-                languageCodeToLearn: languageCodeToLearn,
-                refreshWordsCallback: refreshWordsCallback,
-                manageDownloadImage: manageDownloadImage,
-              ),
-            ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  print('isFavoriteWord: ${_words[index].isFavorite}');
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    print('isFavoriteWord: ${_words[index].isFavorite}');
 
-                  return WordCard(
-                    word: _words[index],
-                    callback: refreshWordsCallback,
-                    manageDownloadImage: manageDownloadImage,
-                    starColor: _words[index].isFavorite
-                        ? Colors.yellow[700]!
-                        : Colors.grey[400]!,
-                  );
-                },
-                childCount: _words.length,
+                    return WordCard(
+                      word: _words[index],
+                      callback: refreshWordsCallback,
+                      manageDownloadImage: manageDownloadImage,
+                      starColor: _words[index].isFavorite
+                          ? Colors.yellow[700]!
+                          : Colors.grey[400]!,
+                    );
+                  },
+                  childCount: _words.length,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
+        if (_isLouding)
+          const Center(
+            child: CircularProgressIndicator(),
+          ),
+      ]),
     );
   }
 }
-

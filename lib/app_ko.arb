@@ -18,6 +18,7 @@
     "cancel": "취소",
     "translateTo": "{language}로 번역",
     "confirmDelete": "{word} 단어를 삭제하시겠습니까?",
+    "deleteLanguageConfirmation": "{language} 언어를 삭제하시겠습니까?",
     "delete": "삭제",
     "image": "이미지"
 
