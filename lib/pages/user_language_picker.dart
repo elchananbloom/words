@@ -1,24 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:words/db/sql_helper.dart';
 import 'package:words/l10n.dart';
 import 'package:words/pages/add_language_picker.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:words/providers/locale_provider.dart';
 
 class UserLanguagePickerWidget extends riverpod.ConsumerStatefulWidget {
   const UserLanguagePickerWidget({
     Key? key,
-    required this.isUserLanguagePicker,
-    required this.func,
-    required this.setUserLanguageToLearn,
+    this.isUserLanguagePicker,
+    this.func,
+    this.setUserLanguageToLearn,
     this.setSelectedLanguage,
+    this.isAppLang,
+    this.isAddLanguageToLearn,
   }) : super(key: key);
 
-  final bool isUserLanguagePicker;
-  final Function func;
-  final Function() setUserLanguageToLearn;
+  final bool? isUserLanguagePicker;
+  final Function? func;
+  final Function()? setUserLanguageToLearn;
   final Function(String)? setSelectedLanguage;
+  final bool? isAppLang;
+  final bool? isAddLanguageToLearn;
 
   @override
   riverpod.ConsumerState<UserLanguagePickerWidget> createState() =>
@@ -54,7 +60,7 @@ class _LanguagePickerWidgetState
   @override
   void initState() {
     super.initState();
-    if (widget.isUserLanguagePicker) {
+    if (widget.isUserLanguagePicker!) {
       getUserLanguageToLearn().then((value) {
         setState(() {
           userLanguageToLearn = value;
@@ -67,7 +73,7 @@ class _LanguagePickerWidgetState
 
   @override
   Widget build(BuildContext context) {
-    if (widget.isUserLanguagePicker) {
+    if (widget.isUserLanguagePicker!) {
       return DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: flag,
@@ -137,6 +143,80 @@ class _LanguagePickerWidgetState
           }).toList(),
         ),
       );
+    } else if (widget.isAppLang!) {
+      return DropdownButton<String>(
+        value: flag,
+        hint: Text(
+          AppLocalizations.of(context)!.selectLanguage,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: Colors.black,
+              ),
+        ),
+        menuMaxHeight: 400,
+        onChanged: (String? value) {
+          setState(() {
+            flag = value!;
+          });
+          final provider = Provider.of<LocaleProvider>(context, listen: false);
+          String languageCode = L10n.getLangCodeFromFlag(value!) == 'he'
+              ? 'iw'
+              : L10n.getLangCodeFromFlag(value);
+          provider.setLocale(Locale(languageCode));
+          SharedPreferences.getInstance().then((prefs) {
+            prefs.setString('appLanguage', languageCode);
+          });
+        },
+        items: L10n.supportedLanguages.map((valueItem) {
+          String a(String b) {
+            return b;
+          }
+
+          return DropdownMenuItem<String>(
+            value: a(L10n.getFlag(valueItem.languageCode)),
+            child: Text(
+              '${L10n.getFlag(valueItem.languageCode)}\t\t${L10n.getLanguageName(context, valueItem.languageCode)}',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.normal,
+                  ),
+            ),
+          );
+        }).toList(),
+      );
+    } else if (widget.isAddLanguageToLearn!) {
+      return DropdownButton<String>(
+        value: flag,
+        hint: Text(
+          AppLocalizations.of(context)!.selectLanguage,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: Colors.black,
+              ),
+        ),
+        menuMaxHeight: 400,
+        onChanged: (String? value) {
+          setState(() {
+            flag = value!;
+          });
+          SharedPreferences.getInstance().then((prefs) {
+            prefs.setString(
+                'userLanguageToLearn', L10n.getLangCodeFromFlag(value!));
+          });
+        },
+        items: L10n.allLanguages.map((valueItem) {
+          String a(String b) {
+            return b;
+          }
+
+          return DropdownMenuItem<String>(
+            value: a(L10n.getFlag(valueItem.languageCode)),
+            child: Text(
+              '${L10n.getFlag(valueItem.languageCode)}\t\t${L10n.getLanguageName(context, valueItem.languageCode)}',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.normal,
+                  ),
+            ),
+          );
+        }).toList(),
+      );
     } else {
       return DropdownButton<String>(
         value: flag,
@@ -194,10 +274,10 @@ class _LanguagePickerWidgetState
       SharedPreferences.getInstance().then((prefs) {
         prefs.setString('userLanguageToLearn', newLangCode);
       });
-      widget.setUserLanguageToLearn();
+      widget.setUserLanguageToLearn!();
       // SQLHelper.updateUser(user);
       // if (widget.isChangeLang) {
-      widget.func(newLangCode);
+      widget.func!(newLangCode);
       // }
       // // provider.setLocale(Locale(value.toString()));
     }
@@ -218,6 +298,8 @@ class _LanguagePickerWidgetState
             func: widget.func,
             setUserLanguageToLearn: widget.setUserLanguageToLearn,
             setSelectedLanguage: setSelectedLanguage,
+            isAddLanguageToLearn: false,
+            isAppLang: false,
           ),
           const SizedBox(height: 40),
           ElevatedButton(
@@ -228,8 +310,8 @@ class _LanguagePickerWidgetState
                   prefs.setString('userLanguageToLearn', selectLanguage!);
                 });
                 getLanguages();
-                widget.setUserLanguageToLearn();
-                widget.func(selectLanguage);
+                widget.setUserLanguageToLearn!();
+                widget.func!(selectLanguage);
                 setState(() {
                   flag = L10n.getFlag(selectLanguage!);
                 });

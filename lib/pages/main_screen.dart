@@ -64,7 +64,8 @@ class MainScreen extends riverpod.ConsumerWidget {
               GlobalCupertinoLocalizations.delegate,
             ],
             home:
-                isUserRegistered ? const MyHomePage() : const SelectLanguage(),
+                isUserRegistered ? const MyHomePage() : 
+                const SelectLanguage(),
           );
         });
   }

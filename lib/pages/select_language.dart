@@ -7,23 +7,30 @@ import 'package:words/pages/app_language_picker.dart';
 import 'package:words/pages/app_localization_singleton.dart';
 import 'package:words/pages/language_picker.dart';
 import 'package:words/pages/my_home.dart';
+import 'package:words/pages/user_language_picker.dart';
 import 'package:words/providers/new_word.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SelectLanguage extends riverpod.ConsumerWidget {
-  const SelectLanguage({ Key? key}) : super(key: key);
+  const SelectLanguage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, ref) {
     return Scaffold(
-      // backgroundColor: Colors.blue,
+      backgroundColor: Theme.of(context).colorScheme.secondary,
       body: Center(
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: Theme.of(context).colorScheme.background,
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 5,
+                offset: Offset(0, 5),
+              ),
+            ],
           ),
-          elevation: 8.0,
-          margin: const EdgeInsets.all(16),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -35,80 +42,59 @@ class SelectLanguage extends riverpod.ConsumerWidget {
                 //   height: 150,
                 // ),
                 const SizedBox(height: 30),
-                // welcome to words text
                 Text(
                   AppLocalizations.of(context)!.welcomeToWords,
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    // color: Colors.black,
-                  ),
+                  style: Theme.of(context).textTheme.headlineLarge,
                 ),
                 const SizedBox(height: 30),
 
-                // choose language to learn
                 Text(
                   AppLocalizations.of(context)!.chooseLanguage,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    // color: Colors.black,
-                  ),
+                  style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(height: 20),
-                LanguagePickerWidget(
-                  // langProvider: languageCodeToLearnProvider,
-                  // isAppLang: false,
-                  // isChangeLang: false,
-                  // isWithCountry: true,
+                const UserLanguagePickerWidget(
+                  isUserLanguagePicker: false,
+                  isAppLang: false,
+                  isAddLanguageToLearn: true,
                 ),
                 const SizedBox(height: 20),
 
-                // choose app language
                 Text(
                   AppLocalizations.of(context)!.chooseAppLanguage,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    // color: Colors.black,
-                  ),
+                  style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(height: 20),
-                const AppLanguagePickerWidget(
-                  // langProvider: secondLangProvider,
-                  // isAppLang: true,
-                  // isChangeLang: false,
-                  // isWithCountry: true,
+                const UserLanguagePickerWidget(
+                  isUserLanguagePicker: false,
+                  isAppLang: true,
                 ),
+
                 const SizedBox(height: 40),
                 ElevatedButton(
-                  onPressed: () async{
+                  onPressed: () async {
                     // set app language singleton
                     final appLocalizations = AppLocalizations.of(context)!;
                     AppLocalizationsSingleton.setInstance(appLocalizations);
 
-                    String? userLanguageToLearn = await SharedPreferences.getInstance().then((prefs) {
+                    String? userLanguageToLearn =
+                        await SharedPreferences.getInstance().then((prefs) {
                       return prefs.getString('userLanguageToLearn');
                     });
 
-                    // final userLanguageToLearn =
-                    //     ref.read(languageCodeToLearnProvider.notifier).state;
-                    // final userLanguage =
-                    //     ref.read(secondLangProvider.notifier).state;
-                    if (userLanguageToLearn != null && userLanguageToLearn != '') {
-                    //   final user = User(
-                    //     userLanguageToLearn: userLanguageToLearn,
-                    //     userLanguage: userLanguage,
-                    //   );
-                    //   SQLHelper.createUser(user);
+                    if (userLanguageToLearn != null &&
+                        userLanguageToLearn != '') {
                       SQLHelper.createLanguage(userLanguageToLearn);
-                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
                       prefs.setBool('isUserRegistered', true);
-                      Navigator.push(
+                      Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const MyHomePage(),
                         ),
+                        (route) =>
+                            false, // This condition makes sure no routes remain in the stack
                       );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(

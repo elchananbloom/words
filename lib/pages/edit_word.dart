@@ -56,7 +56,8 @@ class _EditWordState extends State<EditWord> {
       _secondSentenceController.text =
           widget.word.sentence![Language.appLanguageCode]!;
       _imageController.text = widget.word.image!;
-      _image = Image.file(File(widget.word.image!));
+      // _image = Image.file(File(widget.word.image!));
+      _image = Image.memory(File(widget.word.image!).readAsBytesSync());
       wordLanguageToLearnSentence =
           widget.word.sentence![Language.languageCodeToLearn]!;
       wordAppLanguageSentence =
@@ -318,19 +319,31 @@ class _EditWordState extends State<EditWord> {
 
   void translateToLanguageToLearn() async {
     final translator = GoogleTranslator();
+    setState(() {
+      isLoading = true;
+    });
     var engTranslate =
         await translator.translate(_secondSentenceController.text, to: 'en');
     var firstTranslate = await translator.translate(engTranslate.text,
         to: widget.languageCodeToLearn);
+    setState(() {
+      isLoading = false;
+    });
     _firstSentenceController.text = firstTranslate.text;
   }
 
   void translateToAppLanguage() async {
     final translator = GoogleTranslator();
+    setState(() {
+      isLoading = true;
+    });
     var engTranslate =
         await translator.translate(_firstSentenceController.text, to: 'en');
     var secondTranslate = await translator.translate(engTranslate.text,
         to: widget.appLanguageCode);
+    setState(() {
+      isLoading = false;
+    });
     _secondSentenceController.text = secondTranslate.text;
   }
 }

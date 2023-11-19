@@ -124,6 +124,10 @@
             }
         }
     },
+    "noSentenceFound": "No sentence found",
+    "@noSentenceFound": {
+        "description": "no sentence found"
+    },
     "image": "Image",
     "@image": {
         "description": "the image"

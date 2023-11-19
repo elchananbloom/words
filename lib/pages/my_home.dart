@@ -93,6 +93,9 @@ class _MyHomePageState extends State<MyHomePage> {
     else{
       handleIsLoading(false);
     }
+    setState(() {
+      imageUrl = '';
+    });
 
     return filePathAndName;
   }
@@ -121,10 +124,12 @@ class _MyHomePageState extends State<MyHomePage> {
     await selectImage(pixabayResponse!);
 
     if (imageUrl == '' && !isEdit) {
+      print('imageUrl: $imageUrl');
       setState(() {
         imageUrl =
             pixabayResponse.hits![0].getDownloadLink(res: Resolution.medium)!;
       });
+      print('imageUrl: $imageUrl');
     }
     return imageUrl;
   }
@@ -249,6 +254,8 @@ class _MyHomePageState extends State<MyHomePage> {
                             isUserLanguagePicker: true,
                             func: refreshWordsCallback,
                             setUserLanguageToLearn: setUserLanguageToLearn,
+                            isAddLanguageToLearn: false,
+                            isAppLang: false,
                           ),
                         ],
                       ),

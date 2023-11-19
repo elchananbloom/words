@@ -11,9 +11,11 @@ class LocaleProvider extends ChangeNotifier {
 
   void setLocale(Locale locale) {
     if(!L10n.allLanguages.contains(locale)){
+      print('setLocale: $locale');
       return;
     }
     _locale = locale;
+    print('setLocale: $locale');
     notifyListeners();
   }
 

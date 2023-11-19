@@ -49,49 +49,69 @@ class _AddWordState extends ConsumerState<AddWord> {
 
   void addWord(String languageCodeToLearn, String appLanguageCode) async {
     final engWord = ref.read(newEnglishWordProvider.notifier).state.trim();
-    final url =
-        'https://context.reverso.net/translation/english-hebrew/$engWord';
+    String engSentence = '';
+    var firstLangSentence;
+    var secondLangSentence;
+    try {
+      final url =
+          'https://context.reverso.net/translation/english-hebrew/$engWord';
 
-    widget.handleIsLoading(true);
-    final chaleno = await Chaleno().load(url);
-    List<Result> results = chaleno!.getElementsByClassName('example');
+      widget.handleIsLoading(true);
+      final chaleno = await Chaleno().load(url);
+      List<Result> results = chaleno!.getElementsByClassName('example');
 
-    final res = results[0].html;
+      final res = results[0].html;
 
-    final spans = res!.split('</span>');
+      final spans = res!.split('</span>');
 
-    final eng = spans[0].split('<span class="text" lang="en">')[0];
+      final eng = spans[0].split('<span class="text" lang="en">')[0];
 
-    // Parse the HTML string
-    final document = html_parser.parse(eng);
+      // Parse the HTML string
+      final document = html_parser.parse(eng);
 
-    // Find the relevant element by class name or tag, e.g., <span class="text">
-    final element = document.querySelector('.text');
+      // Find the relevant element by class name or tag, e.g., <span class="text">
+      final element = document.querySelector('.text');
 
-    // Extract the text content of the element and remove leading/trailing whitespace
-    String engSentence = element?.text.trim() ?? '';
+      // Extract the text content of the element and remove leading/trailing whitespace
+      engSentence = element?.text.trim() ?? '';
 
-    final translator = GoogleTranslator();
-    final firstLangSentence = await translator.translate(engSentence,
-        from: 'en', to: languageCodeToLearn);
+      final translator = GoogleTranslator();
+      firstLangSentence = await translator.translate(engSentence,
+          from: 'en', to: languageCodeToLearn);
 
-    final secondLangSentence = await translator.translate(engSentence,
-        from: 'en', to: appLanguageCode);
-
+      secondLangSentence = await translator.translate(engSentence,
+          from: 'en', to: appLanguageCode);
+    } catch (e) {
+      print(e);
+    }
     String filePathAndName = await widget.manageDownloadImage(engWord, false);
+    var firstLangSentenceText = '';
+    var secondLangSentenceText = '';
+    try{
+      firstLangSentenceText = firstLangSentence.text;
+      secondLangSentenceText = secondLangSentence.text;
+    }
+    catch(e){
+      secondLangSentenceText = AppLocalizations.of(context)!.noSentenceFound;
+      print(e);
+    }
 
     final word = Word(
       language: languageCodeToLearn,
       word: {
         Language.appLanguageCode:
-            removeDiacritics(ref.read(newAppLangWordProvider.notifier).state).trim(),
+            removeDiacritics(ref.read(newAppLangWordProvider.notifier).state)
+                .trim(),
         Language.languageCodeToLearn: removeDiacritics(
-            ref.read(newLangToLearnWordProvider.notifier).state).trim(),
+                ref.read(newLangToLearnWordProvider.notifier).state)
+            .trim(),
         Language.english: engWord,
       },
       sentence: {
-        Language.appLanguageCode: removeDiacritics(secondLangSentence.text).trim(),
-        Language.languageCodeToLearn: removeDiacritics(firstLangSentence.text).trim(),
+        Language.appLanguageCode:
+            removeDiacritics(secondLangSentenceText).trim(),
+        Language.languageCodeToLearn:
+            removeDiacritics(firstLangSentenceText).trim(),
         Language.english: engSentence,
       },
       image: filePathAndName,
