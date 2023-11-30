@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:words/pages/app_localization_singleton.dart';
 
 class CustomInputDecoration extends InputDecoration {
   // final FocusNode focusNode;
@@ -22,7 +21,6 @@ class CustomInputDecoration extends InputDecoration {
             onPressed: handleSearch,
             icon: const Icon(
               Icons.search,
-              // color: Colors.black,
               size: 20,
             ),
           ),
@@ -36,7 +34,6 @@ class CustomInputDecoration extends InputDecoration {
           onPressed: handleClose,
           icon: const Icon(
             Icons.clear,
-            // color: Colors.black,
             size: 20,
           ),
         ),

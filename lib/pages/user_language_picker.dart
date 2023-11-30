@@ -4,15 +4,15 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:words/db/sql_helper.dart';
 import 'package:words/l10n.dart';
-import 'package:words/pages/add_language_picker.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:words/providers/locale_provider.dart';
+import 'package:words/utills/snack_bar.dart';
 
 class UserLanguagePickerWidget extends riverpod.ConsumerStatefulWidget {
   const UserLanguagePickerWidget({
     Key? key,
     this.isUserLanguagePicker,
-    this.func,
+    this.refreshWordsCallback,
     this.setUserLanguageToLearn,
     this.setSelectedLanguage,
     this.isAppLang,
@@ -20,7 +20,7 @@ class UserLanguagePickerWidget extends riverpod.ConsumerStatefulWidget {
   }) : super(key: key);
 
   final bool? isUserLanguagePicker;
-  final Function? func;
+  final Function? refreshWordsCallback;
   final Function()? setUserLanguageToLearn;
   final Function(String)? setSelectedLanguage;
   final bool? isAppLang;
@@ -110,11 +110,20 @@ class _LanguagePickerWidgetState
                               ),
                               const SizedBox(height: 40),
                               ElevatedButton(
-                                onPressed: () {
+                                onPressed: () async{
                                   SQLHelper.deleteLanguage(valueItem);
                                   getLanguages();
                                   Navigator.of(context).pop();
                                   Navigator.of(context).pop();
+                                  widget.refreshWordsCallback!(userLanguageToLearn!);
+                                  await SnackBarWidget.showSnackBar(
+                                    context,
+                                    AppLocalizations.of(context)!
+                                        .languageDeleted(
+                                      L10n.getLanguageName(context, valueItem),
+                                    ),
+                                  );
+
                                 },
                                 child: Text(
                                   AppLocalizations.of(context)!.delete,
@@ -135,7 +144,9 @@ class _LanguagePickerWidgetState
                   backgroundColor: Colors.white,
                   child: Text(
                     L10n.getFlag(valueItem),
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                      color: Colors.black
+                    ),
                   ),
                 ),
               ),
@@ -149,7 +160,7 @@ class _LanguagePickerWidgetState
         hint: Text(
           AppLocalizations.of(context)!.selectLanguage,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Colors.black,
+                // color: Colors.black,
               ),
         ),
         menuMaxHeight: 400,
@@ -188,7 +199,7 @@ class _LanguagePickerWidgetState
         hint: Text(
           AppLocalizations.of(context)!.selectLanguage,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Colors.black,
+                // color: Colors.black,
               ),
         ),
         menuMaxHeight: 400,
@@ -223,7 +234,7 @@ class _LanguagePickerWidgetState
         hint: Text(
           AppLocalizations.of(context)!.selectLanguage,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Colors.black,
+                // color: Colors.black,
               ),
         ),
         menuMaxHeight: 400,
@@ -277,7 +288,7 @@ class _LanguagePickerWidgetState
       widget.setUserLanguageToLearn!();
       // SQLHelper.updateUser(user);
       // if (widget.isChangeLang) {
-      widget.func!(newLangCode);
+      widget.refreshWordsCallback!(newLangCode);
       // }
       // // provider.setLocale(Locale(value.toString()));
     }
@@ -295,7 +306,7 @@ class _LanguagePickerWidgetState
           const SizedBox(height: 40),
           UserLanguagePickerWidget(
             isUserLanguagePicker: false,
-            func: widget.func,
+            refreshWordsCallback: widget.refreshWordsCallback,
             setUserLanguageToLearn: widget.setUserLanguageToLearn,
             setSelectedLanguage: setSelectedLanguage,
             isAddLanguageToLearn: false,
@@ -311,7 +322,7 @@ class _LanguagePickerWidgetState
                 });
                 getLanguages();
                 widget.setUserLanguageToLearn!();
-                widget.func!(selectLanguage);
+                widget.refreshWordsCallback!(selectLanguage!);
                 setState(() {
                   flag = L10n.getFlag(selectLanguage!);
                 });

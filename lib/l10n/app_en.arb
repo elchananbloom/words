@@ -128,6 +128,27 @@
     "@noSentenceFound": {
         "description": "no sentence found"
     },
+    "pleaseFillBothFields": "Please fill {appLanguage} word and {languageToLearn} word.",
+    "@pleaseFillBothFields": {
+        "description": "please fill both fields",
+        "placeholders": {
+            "appLanguage": {
+                "type": "String"
+            },
+            "languageToLearn": {
+                "type": "String"
+            }
+        }
+    },
+    "languageDeleted": "Language {language} deleted",
+    "@languageDeleted": {
+        "description": "language deleted",
+        "placeholders": {
+            "language": {
+                "type": "String"
+            }
+        }
+    },
     "image": "Image",
     "@image": {
         "description": "the image"

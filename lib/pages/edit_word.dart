@@ -8,6 +8,7 @@ import 'package:words/l10n.dart';
 import 'package:words/models/enums.dart';
 import 'package:words/models/word/word.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:words/utills/snack_bar.dart';
 
 class EditWord extends StatefulWidget {
   EditWord({
@@ -25,7 +26,8 @@ class EditWord extends StatefulWidget {
   final Word word;
   final int? id;
   final Function callback;
-  final Future<String> Function(String, bool) manageDownloadImage;
+  final Future<String> Function(String, bool, {String imageSearch})
+      manageDownloadImage;
 
   @override
   _EditWordState createState() => _EditWordState();
@@ -37,6 +39,7 @@ class _EditWordState extends State<EditWord> {
   final _firstSentenceController = TextEditingController();
   final _secondSentenceController = TextEditingController();
   final _imageController = TextEditingController();
+  final _imageSearchController = TextEditingController();
   Image? _image;
   String wordLanguageToLearnSentence = '';
   String wordAppLanguageSentence = '';
@@ -76,6 +79,7 @@ class _EditWordState extends State<EditWord> {
     _firstSentenceController.dispose();
     _secondSentenceController.dispose();
     _imageController.dispose();
+    _imageSearchController.dispose();
     super.dispose();
   }
 
@@ -103,8 +107,8 @@ class _EditWordState extends State<EditWord> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Stack(
-        children: [Padding(
+      child: Stack(children: [
+        Padding(
           padding: EdgeInsets.fromLTRB(
             15,
             15,
@@ -120,15 +124,50 @@ class _EditWordState extends State<EditWord> {
                 onTap: () async {
                   setState(() {
                     isLoading = true;
-                  });               
+                  });
                   await widget.manageDownloadImage(
-                      widget.word.word![Language.english]!, true);
+                      widget.word.word![Language.english]!.toLowerCase(), true);
                   var file = await File(widget.word.image!).readAsBytes();
                   setState(() {
                     // imageCache.clear();
                     _image = Image.memory(file);
                     isLoading = false;
                   });
+                },
+                onLongPress: () {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          content: TextField(
+                            controller: _imageSearchController,
+                          ),
+                          actions: [
+                            ElevatedButton(
+                              onPressed: () async {
+                                setState(() {
+                                  isLoading = true;
+                                });
+                                await widget.manageDownloadImage(
+                                    widget.word.word![Language.english]!
+                                        .toLowerCase(),
+                                    true,
+                                    imageSearch: _imageSearchController.text);
+                                var file = await File(widget.word.image!)
+                                    .readAsBytes();
+                                setState(() {
+                                  // imageCache.clear();
+                                  _image = Image.memory(file);
+                                  isLoading = false;
+                                });
+                                _imageSearchController.clear();
+                                Navigator.of(context).pop();
+                              },
+                              child: Text(AppLocalizations.of(context)!.search),
+                            ),
+                          ],
+                        );
+                      });
                 },
                 child: Container(
                   height: 200,
@@ -217,7 +256,7 @@ class _EditWordState extends State<EditWord> {
                   ),
                 ],
               ),
-      
+
               const SizedBox(
                 height: 10,
               ),
@@ -246,7 +285,6 @@ class _EditWordState extends State<EditWord> {
                                   L10n.getLanguageName(
                                       context, widget.languageCodeToLearn)),
                             ),
-                            
                           ),
                         ),
                       ),
@@ -260,9 +298,7 @@ class _EditWordState extends State<EditWord> {
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      
                 children: [
-                 
                   ElevatedButton(
                     onPressed: () {
                       _firstWordController.text = '';
@@ -271,34 +307,32 @@ class _EditWordState extends State<EditWord> {
                       _secondSentenceController.text = '';
                       _imageController.text = '';
                       widget.callback(widget.languageCodeToLearn);
-      
+
                       Navigator.of(context).pop();
                     },
                     child: Text(AppLocalizations.of(context)!.cancel),
                     style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(
-                                  Theme.of(context).colorScheme.error),
-                              ),
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                          Theme.of(context).colorScheme.error),
+                    ),
                   ),
-                   ElevatedButton(
+                  ElevatedButton(
                     onPressed: () async {
                       if (widget.id != null) {
                         await _updateWord(widget.id!, widget.word);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              AppLocalizations.of(context)!.wordUpdated(
-                                  widget.word.word![Language.appLanguageCode]!),
-                            ),
-                          ),
+                        _firstWordController.text = '';
+                        _secondWordController.text = '';
+                        _firstSentenceController.text = '';
+                        _secondSentenceController.text = '';
+                        _imageController.text = '';
+                        Navigator.of(context).pop();
+                        await SnackBarWidget.showSnackBar(
+                          context,
+                          AppLocalizations.of(context)!.wordUpdated(
+                              widget.word.word![Language.appLanguageCode]!),
                         );
                       }
-      
-                      _firstWordController.text = '';
-                      _secondWordController.text = '';
-                      _firstSentenceController.text = '';
-                      _secondSentenceController.text = '';
-                      _imageController.text = '';
+
                       Navigator.of(context).pop();
                     },
                     child: Text(AppLocalizations.of(context)!.updateWord),
@@ -312,8 +346,7 @@ class _EditWordState extends State<EditWord> {
           const Center(
             child: CircularProgressIndicator(),
           ),
-        ]
-      ),
+      ]),
     );
   }
 

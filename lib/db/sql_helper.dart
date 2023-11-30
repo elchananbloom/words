@@ -5,7 +5,6 @@ import 'package:sqflite/sqflite.dart' as sql;
 import 'package:words/models/word/word.dart';
 import 'package:words/models/enums.dart';
 
-//hebrew and hangul to first and second language
 class SQLHelper {
   static Future<void> createTables(sql.Database database) async {
     await database.execute("""CREATE TABLE words (
@@ -22,16 +21,12 @@ class SQLHelper {
           updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
           created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
           )""");
-    // print('createTables: words');
-
-    // print('createTables: users');
 
     await database.execute("""CREATE TABLE languages (
           id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
           language TEXT,
           created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
           )""");
-    // print('createTables: languages');
   }
 
   static Future<sql.Database> db() async {
@@ -65,8 +60,6 @@ class SQLHelper {
       'language': lang,
     };
 
-    print('createLanguage: $data');
-
     return db.insert('languages', data,
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
   }
@@ -98,8 +91,10 @@ class SQLHelper {
 
     // Check if a word with the same 'first_lang' and 'second_lang' exists.
     final existingWord = await db.query('words',
-        where: 'LOWER(first_lang) = ? AND LOWER(second_lang) = ?',
+        where:
+            'language = ? AND LOWER(first_lang) = ? AND LOWER(second_lang) = ?',
         whereArgs: [
+          data['language'].toString(),
           data['first_lang'].toString().toLowerCase(),
           data['second_lang'].toString().toLowerCase()
         ]);
@@ -115,39 +110,7 @@ class SQLHelper {
     }
   }
 
-  static Future<List<Word>> getWords(String lang) async {
-    final db = await SQLHelper.db();
-    final List<Map<String, dynamic>> maps = await db.query(
-      'words',
-      where: 'language = ?',
-      whereArgs: [lang],
-      orderBy: 'created_at DESC',
-    );
-
-    return List.generate(maps.length, (i) {
-      // print('getWords: ${maps[i]}');
-      final word = Word(
-        id: maps[i]['id'],
-        language: maps[i]['language'],
-        word: <Language, String>{
-          Language.english: maps[i]['english'],
-          Language.languageCodeToLearn: maps[i]['first_lang'],
-          Language.appLanguageCode: maps[i]['second_lang'],
-        },
-        sentence: <Language, String>{
-          Language.english: maps[i]['sentence_english'],
-          Language.languageCodeToLearn: maps[i]['sentence_first_lang'],
-          Language.appLanguageCode: maps[i]['sentence_second_lang'],
-        },
-        image: maps[i]['image'],
-        isFavorite: maps[i]['is_favorite'] == 1 ? true : false,
-      );
-      // print('getWordsId: ${word.id}');
-      return word;
-    });
-  }
-
-  static Future<List<Word>> getFavoritesWords(String lang) async{
+  static Future<List<Word>> getFavoritesWords(String lang) async {
     final db = await SQLHelper.db();
     final List<Map<String, dynamic>> maps = await db.query(
       'words',
@@ -243,7 +206,6 @@ class SQLHelper {
 
   static Future<int> updateWord(int id, Word word) async {
     final db = await SQLHelper.db();
-    print('isFavorite: ${word.isFavorite}');
     final data = {
       'id': id,
       'language': word.language,
@@ -264,7 +226,6 @@ class SQLHelper {
       whereArgs: [id],
     );
 
-    print('updateWord: $res');
 
     return res;
   }
@@ -285,7 +246,6 @@ class SQLHelper {
         await file.delete();
       }
 
-      // print('deleteWord: $id');
     } catch (e) {
       debugPrint('ErrorDelete: $e');
     }

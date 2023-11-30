@@ -17,7 +17,11 @@ class WordCard extends StatefulWidget {
 
   final Word word;
   final Function(String, {String term}) callback;
-  final Future<String> Function(String, bool) manageDownloadImage;
+  final Future<String> Function(String, bool
+  , 
+  {String imageSearch}
+  )
+      manageDownloadImage;
   Color starColor;
 
   @override
@@ -46,7 +50,7 @@ class _WordCardState extends State<WordCard> {
             builder: (BuildContext context) {
               return WordScreen(
                 word: widget.word,
-                callback: widget.callback,
+                refreshWordsCallback: widget.callback,
                 manageDownloadImage: widget.manageDownloadImage,
               );
             },

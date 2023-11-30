@@ -16,24 +16,50 @@ import 'package:flutter_localized_locales/flutter_localized_locales.dart';
 import 'package:provider/provider.dart';
 import 'package:words/providers/user_provider.dart';
 
-class MainScreen extends riverpod.ConsumerWidget {
-  const MainScreen(
-      {required this.isUserRegistered,
-      required this.userLanguageToLearn,
-      required this.appLanguage,
-      Key? key})
-      : super(key: key);
+class MainScreen extends riverpod.ConsumerStatefulWidget {
+  const MainScreen({
+    required this.isUserRegistered,
+    required this.userLanguageToLearn,
+    required this.appLanguage,
+    Key? key,
+  }) : super(key: key);
 
   final bool isUserRegistered;
   final String? userLanguageToLearn;
   final String? appLanguage;
+
+  static _MainScreenState? of(BuildContext context) =>
+      context.findAncestorStateOfType<_MainScreenState>();
+
   @override
-  Widget build(BuildContext context, ref) {
+  _MainScreenState createState() => _MainScreenState();
+}
+
+class _MainScreenState extends riverpod.ConsumerState<MainScreen> {
+
+  late ThemeMode _theme;
+
+  @override
+  void initState() {
+    super.initState();
+    _theme = ThemeMode.system;
+  }
+
+  handleChangeTheme() {
+    print('handleChangeTheme');
+    setState(() {
+      _theme = _theme == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+    });
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
     // final user = ref.read(userProvider).asData?.value;
     // final isUserRegistered = user != null &&
     //     user.userLanguage != null && user.userLanguageToLearn != null;
 
-    print('isUserRegistered: $isUserRegistered');
+    // print('isUserRegistered: $isUserRegistered');
 
     return ChangeNotifierProvider(
         create: (_) => LocaleProvider(),
@@ -46,14 +72,16 @@ class MainScreen extends riverpod.ConsumerWidget {
           // }
           final provider = Provider.of<LocaleProvider>(context);
           Locale locale = provider.locale;
-          if(appLanguage != null) {
-            locale = Locale(appLanguage!);
+          if (widget.appLanguage != null) {
+            locale = Locale(widget.appLanguage!);
           }
 
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             title: 'Words',
             theme: MyThemeData.lightTheme,
+            darkTheme: MyThemeData.darkTheme,
+            themeMode: _theme,
             locale: locale,
             supportedLocales: L10n.supportedLanguages,
             localizationsDelegates: const [
@@ -64,7 +92,10 @@ class MainScreen extends riverpod.ConsumerWidget {
               GlobalCupertinoLocalizations.delegate,
             ],
             home:
-                isUserRegistered ? const MyHomePage() : 
+            //  widget.isUserRegistered
+            //     ?  MyHomePage(
+            //     )
+            //     : 
                 const SelectLanguage(),
           );
         });

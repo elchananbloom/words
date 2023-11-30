@@ -54,6 +54,9 @@ dependencies:
   path_provider: ^2.1.1
   flutter_cache_manager: ^3.3.1
   favorite_button: ^0.0.4
+  another_flushbar: ^1.12.30
+  url_launcher: ^6.2.1
+  flutter_tts: ^3.8.5
 
 dev_dependencies:
   flutter_test:

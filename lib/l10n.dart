@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localized_locales/flutter_localized_locales.dart';
-import 'package:words/providers/locale_provider.dart';
-import 'package:provider/provider.dart';
 
 class L10n {
   static final allLanguages = [
@@ -9,7 +7,7 @@ class L10n {
     const Locale('ko'),
     const Locale('iw'),
     const Locale('ar'),
-    const Locale('zh'),
+    // const Locale('zh'),
     const Locale('ja'),
     const Locale('de'),
     const Locale('fr'),
@@ -19,12 +17,27 @@ class L10n {
     const Locale('pt'),
     const Locale('hi'),
     const Locale('bn'),
+    //tagalog
+    const Locale('tl'),
   ];
 
   static final supportedLanguages = [
     const Locale('en'),
     const Locale('ko'),
     const Locale('iw'),
+    const Locale('ar'),
+    // const Locale('zh'),
+    const Locale('ja'),
+    const Locale('de'),
+    const Locale('fr'),
+    const Locale('es'),
+    const Locale('it'),
+    const Locale('ru'),
+    const Locale('pt'),
+    const Locale('hi'),
+    const Locale('bn'),
+    //tagalog
+    const Locale('tl'),
   ];
 
   static String getFlag(String countryCode) {
@@ -57,6 +70,8 @@ class L10n {
         return '🇮🇳';
       case 'bn':
         return '🇧🇩';
+      case 'tl':
+        return '🇵🇭';
       case '+':
         return '+';
       default:
@@ -94,6 +109,8 @@ class L10n {
         return 'hi';
       case '🇧🇩':
         return 'bn';
+      case '🇵🇭':
+        return 'tl';
 
       default:
         return 'no flag';
@@ -108,14 +125,5 @@ class L10n {
       return '';
     }
     return LocaleNames.of(context)!.nameOf(countryCode)!;
-  }
-
-  static String getLanguageCode(BuildContext context, String countryCode) {
-    final provider = Provider.of<LocaleProvider>(context);
-    final locale = provider.locale;
-    if (locale.languageCode == 'he') {
-      return 'iw';
-    }
-    return locale.languageCode;
   }
 }

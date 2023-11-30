@@ -21,6 +21,8 @@
     "deleteLanguageConfirmation": "האם אתה בטוח שברצונך למחוק את השפה {language}?",
     "delete": "מחק",
     "noSentenceFound": "לא נמצאו משפטים",
+    "pleaseFillBothFields": "אנא מלא את המילה ב-{appLanguage} ואת המילה ב-{languageToLearn}.",
+    "languageDeleted": "השפה {language} נמחקה",
     "image": "תמונה"
 
 

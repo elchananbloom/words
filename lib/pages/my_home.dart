@@ -6,17 +6,21 @@ import 'package:pixabay_picker/model/pixabay_media.dart';
 import 'package:pixabay_picker/pixabay_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:words/db/sql_helper.dart';
+import 'package:words/pages/main_screen.dart';
 import 'package:words/pages/user_language_picker.dart';
 import 'package:words/utills/word_card.dart';
 import 'package:words/models/word/word.dart';
 import 'package:words/pages/custom_search_bar.dart';
 import 'package:words/pages/add_word.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
+  const MyHomePage({
+    Key? key,
+  }) : super(key: key);
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -81,16 +85,17 @@ class _MyHomePageState extends State<MyHomePage> {
     return languageCodeToLearn!;
   }
 
-  Future<String> manageDownloadImage(String engWord, bool isEdit) async {
+  Future<String> manageDownloadImage(String engWord, bool isEdit,
+      {String imageSearch = ''}) async {
     var documentDirectory = await getApplicationDocumentsDirectory();
+    String wordSearch = imageSearch == '' ? engWord : imageSearch!;
     var filePathAndName = '${documentDirectory.path}/images/$engWord.jpg';
     //check if the directory exists
     var exists = await File(filePathAndName).exists();
     if (isEdit || !exists) {
-      final img = await getImageByDom(engWord, isEdit);
+      final img = await getImageByDom(wordSearch, isEdit);
       await downloadImage(img, engWord, filePathAndName);
-    }
-    else{
+    } else {
       handleIsLoading(false);
     }
     setState(() {
@@ -129,8 +134,8 @@ class _MyHomePageState extends State<MyHomePage> {
         imageUrl =
             pixabayResponse.hits![0].getDownloadLink(res: Resolution.medium)!;
       });
-      print('imageUrl: $imageUrl');
     }
+    print('imageUrl: $imageUrl');
     return imageUrl;
   }
 
@@ -150,7 +155,12 @@ class _MyHomePageState extends State<MyHomePage> {
         width: 300,
         child: Column(
           children: [
-            Text(AppLocalizations.of(context)!.selectImage),
+            Text(
+              AppLocalizations.of(context)!.selectImage,
+              style: Theme.of(context).textTheme.headlineMedium,
+              softWrap: true,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(
               height: 20,
             ),
@@ -214,63 +224,7 @@ class _MyHomePageState extends State<MyHomePage> {
           },
           child: CustomScrollView(
             slivers: [
-              SliverAppBar(
-                centerTitle: true,
-                pinned: true,
-                expandedHeight: 100,
-                backgroundColor: Theme.of(context).primaryColor,
-                // backgroundColor: Color.fromARGB(255, 196, 234, 244),
-                actions: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          IconButton(
-                            icon: Icon(
-                              Icons.star,
-                              color: !isFavorite
-                                  ? Colors.yellow
-                                  : Colors.grey[400],
-                            ),
-                            onPressed: () async {
-                              if (isFavorite) {
-                                print('isFavoritePage: $isFavorite');
-                                await _refreshFavoritesWords();
-                              } else {
-                                setState(() {
-                                  isFavorite = true;
-                                });
-                                _refreshWords(languageCodeToLearn);
-                              }
-                            },
-                          ),
-                          Text(
-                            'Words',
-                            style: Theme.of(context).textTheme.headlineLarge,
-                          ),
-                          UserLanguagePickerWidget(
-                            isUserLanguagePicker: true,
-                            func: refreshWordsCallback,
-                            setUserLanguageToLearn: setUserLanguageToLearn,
-                            isAddLanguageToLearn: false,
-                            isAppLang: false,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-                bottom: Tab(
-                  height: 80,
-                  child: CustomSearchBar(
-                    refreshWordsCallback: refreshWordsCallback,
-                    labelText: AppLocalizations.of(context)!.search,
-                    languageCodeToLearn: languageCodeToLearn,
-                  ),
-                ),
-              ),
+              appBar(context),
               SliverAppBar(
                 floating: true,
                 pinned: true,
@@ -280,14 +234,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 flexibleSpace: AddWord(
                   languageCodeToLearn: languageCodeToLearn,
                   refreshWordsCallback: refreshWordsCallback,
-                  manageDownloadImage: manageDownloadImage,
                   handleIsLoading: handleIsLoading,
+                  manageDownloadImage: manageDownloadImage,
                 ),
               ),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
-                    print('isFavoriteWord: ${_words[index].isFavorite}');
+                    // print('isFavoriteWord: ${_words[index].isFavorite}');
 
                     return WordCard(
                       word: _words[index],
@@ -308,7 +262,125 @@ class _MyHomePageState extends State<MyHomePage> {
           const Center(
             child: CircularProgressIndicator(),
           ),
+        // all rights reserved
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: GestureDetector(
+                onTap: () async{
+                  //open telegram
+                  // try {
+                    const url = 'https://linkedin.com/in/elchananbloom';
+                    final uri = Uri.parse(url);
+                    await launchUrl(uri,
+                    mode: LaunchMode.externalApplication);
+                  // } catch (e) {
+                  //   print(e);
+                  // }
+                },
+                child: Text("© Elchanan Bloom.",
+                    // AppLocalizations.of(context)!.allRightsReserved,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          color: Colors.grey[400],
+                        )),
+              ),
+            ),
+          ),
+        ),
       ]),
+    );
+  }
+
+  SliverAppBar appBar(BuildContext context) {
+    var appBarIcons = Row(
+      children: [
+        IconButton(
+          icon: Icon(
+            Icons.star,
+            color: !isFavorite ? Colors.yellow : Colors.grey[400],
+          ),
+          onPressed: () async {
+            if (isFavorite) {
+              print('isFavoritePage: $isFavorite');
+              await _refreshFavoritesWords();
+            } else {
+              setState(() {
+                isFavorite = true;
+              });
+              _refreshWords(languageCodeToLearn);
+            }
+          },
+        ),
+        Transform.rotate(
+          angle:
+              3.14159, // Angle in radians to rotate the IconButton (adjust as needed)
+          child: IconButton(
+            icon: Icon(
+              Icons.nightlight_round_sharp,
+              color: Theme.of(context).iconTheme.color,
+            ),
+            onPressed: () {
+              MainScreen.of(context)!.handleChangeTheme();
+            },
+          ),
+        )
+      ],
+    );
+    return SliverAppBar(
+      centerTitle: true,
+      pinned: true,
+      expandedHeight: 100,
+      backgroundColor: Theme.of(context).primaryColor,
+      actions: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            child: Row(
+              // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: appBarIcons,
+                  ),
+                ),
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Words',
+                      style: Theme.of(context).textTheme.headlineLarge,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: UserLanguagePickerWidget(
+                      isUserLanguagePicker: true,
+                      refreshWordsCallback: refreshWordsCallback,
+                      setUserLanguageToLearn: setUserLanguageToLearn,
+                      isAddLanguageToLearn: false,
+                      isAppLang: false,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+      bottom: Tab(
+        height: 80,
+        child: CustomSearchBar(
+          refreshWordsCallback: refreshWordsCallback,
+          labelText: AppLocalizations.of(context)!.search,
+          languageCodeToLearn: languageCodeToLearn,
+        ),
+      ),
     );
   }
 }

@@ -10,18 +10,21 @@ import 'package:words/db/sql_helper.dart';
 import 'package:words/pages/edit_word.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:words/utills/snack_bar.dart';
+import 'package:words/utills/text_to_speech.dart';
 
 class WordScreen extends ConsumerStatefulWidget {
   const WordScreen({
     Key? key,
     required this.word,
-    required this.callback,
+    required this.refreshWordsCallback,
     required this.manageDownloadImage,
   }) : super(key: key);
 
   final Word word;
-  final Function(String, {String term}) callback;
-  final Future<String> Function(String, bool) manageDownloadImage;
+  final Function(String, {String term}) refreshWordsCallback;
+  final Future<String> Function(String, bool, {String imageSearch})
+      manageDownloadImage;
 
   @override
   ConsumerState<WordScreen> createState() => _WordScreenState();
@@ -36,7 +39,7 @@ class _WordScreenState extends ConsumerState<WordScreen> {
   void initState() {
     super.initState();
     word = widget.word;
-    callback = widget.callback;
+    callback = widget.refreshWordsCallback;
     getUserLanguageToLearn().then((value) {
       setState(() {
         userLanguageToLearn = value;
@@ -65,16 +68,13 @@ class _WordScreenState extends ConsumerState<WordScreen> {
     Future<void> deleteWord(int id, String imgUrl, Word word) async {
       // Your existing deleteWord function logic
       await SQLHelper.deleteWord(id, imgUrl);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context)!
-                .wordDeleted(word.word![Language.appLanguageCode]!),
-          ),
-        ),
-      );
-      callback(languageCodeToLearn);
+      widget.refreshWordsCallback(languageCodeToLearn);
       Navigator.of(context).pop();
+      await SnackBarWidget.showSnackBar(
+        context,
+        AppLocalizations.of(context)!
+            .wordDeleted(word.word![Language.appLanguageCode]!),
+      );
     }
 
     Future<void> deleteWordConfirmation(
@@ -225,45 +225,109 @@ class _WordScreenState extends ConsumerState<WordScreen> {
                 const SizedBox(
                   height: 40,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Text(
-                      word.word![Language.languageCodeToLearn]!,
-                      style: Theme.of(context).textTheme.headlineLarge,
-                    ),
-                    const SizedBox(
-                      width: 50,
-                    ),
-                    Text(
-                      word.word![Language.appLanguageCode]!,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                  ],
+                Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 25),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              IconButton(
+                                onPressed: () {
+                                  TextToSpeech.speak(
+                                      word.word![Language.languageCodeToLearn]!,
+                                      languageCodeToLearn);
+                                },
+                                icon: const Icon(
+                                  Icons.volume_up,
+                                  color: Colors.blue,
+                                  size: 30,
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              Text(
+                                word.word![Language.languageCodeToLearn]!,
+                                style:
+                                    Theme.of(context).textTheme.headlineLarge,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // const SizedBox(
+                      //   width: 50,
+                      // ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 25),
+                          child: Text(
+                            word.word![Language.appLanguageCode]!,
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                        ),
+                      ),
+                      // const SizedBox(
+                      //   width: 10,
+                      // ),
+                    ],
+                  ),
                 ),
                 const SizedBox(
                   height: 60,
                 ),
-                Directionality(
-                  textDirection: isLanguageToLearnRTL
-                      ? TextDirection.rtl
-                      : TextDirection.ltr,
-                  child: Text(
-                    wordLanguageToLearnSentence,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                    // softWrap: true, // This allows the text to wrap to the next line.
-                    maxLines:
-                        3, // Set the maximum number of lines before it wraps.
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Align(
+                      alignment: isLanguageToLearnRTL
+                          ? Alignment.centerLeft
+                          : Alignment.centerRight,
+                      child: IconButton(
+                        onPressed: () {
+                          TextToSpeech.speak(
+                            word.sentence![Language.languageCodeToLearn]!,
+                            languageCodeToLearn,
+                          );
+                        },
+                        icon: const Icon(
+                          Icons.volume_up,
+                          color: Colors.blue,
+                          size: 30,
+                        ),
+                      ),
+                    ),
+                    // SizedBox(
+                    //   width: 100,
+                    // ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 30, right: 30),
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width *
+                              0.8, // Adjust width as needed
+                          child: Directionality(
+                            textDirection: isLanguageToLearnRTL
+                                ? TextDirection.rtl
+                                : TextDirection.ltr,
+                            child: Text(
+                              wordLanguageToLearnSentence,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.headlineMedium,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(
                   height: 20,
@@ -283,7 +347,7 @@ class _WordScreenState extends ConsumerState<WordScreen> {
                             fontWeight: FontWeight.w400,
                             // height: 0.12,
                             letterSpacing: 0.50,
-                            color: Colors.black,
+                            // color: Colors.black,
                           ),
                       softWrap:
                           true, // This allows the text to wrap to the next line.

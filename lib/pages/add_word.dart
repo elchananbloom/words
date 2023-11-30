@@ -1,37 +1,32 @@
-import 'dart:io';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:pixabay_picker/model/pixabay_media.dart';
-import 'package:pixabay_picker/pixabay_picker.dart';
 import 'package:translator/translator.dart';
 import 'package:words/db/sql_helper.dart';
 import 'package:words/l10n.dart';
 import 'package:chaleno/chaleno.dart';
 import 'package:html/parser.dart' as html_parser;
-import 'package:http/http.dart' as http;
-import 'package:html/parser.dart' show parse;
 import 'package:words/models/enums.dart';
 import 'package:words/models/word/word.dart';
 import 'package:words/providers/new_word.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'dart:core';
 
+import 'package:words/utills/snack_bar.dart';
+
 class AddWord extends ConsumerStatefulWidget {
   const AddWord(
       {required this.languageCodeToLearn,
       required this.refreshWordsCallback,
-      required this.manageDownloadImage,
       required this.handleIsLoading,
+      required this.manageDownloadImage,
       Key? key})
       : super(key: key);
 
   final String languageCodeToLearn;
   final Function(String lang, {String term}) refreshWordsCallback;
-  final Future<String> Function(String word, bool isEdit) manageDownloadImage;
   final Function(bool isLoading) handleIsLoading;
+  final Future<String> Function(String, bool, {String imageSearch})
+      manageDownloadImage;
 
   @override
   _AddWordState createState() => _AddWordState();
@@ -77,21 +72,22 @@ class _AddWordState extends ConsumerState<AddWord> {
 
       final translator = GoogleTranslator();
       firstLangSentence = await translator.translate(engSentence,
-          from: 'en', to: languageCodeToLearn);
+          from: 'en',
+          to: languageCodeToLearn == 'he' ? 'iw' : languageCodeToLearn);
 
       secondLangSentence = await translator.translate(engSentence,
           from: 'en', to: appLanguageCode);
     } catch (e) {
       print(e);
     }
-    String filePathAndName = await widget.manageDownloadImage(engWord, false);
+    String filePathAndName =
+        await widget.manageDownloadImage(engWord.toLowerCase(), false);
     var firstLangSentenceText = '';
     var secondLangSentenceText = '';
-    try{
+    try {
       firstLangSentenceText = firstLangSentence.text;
       secondLangSentenceText = secondLangSentence.text;
-    }
-    catch(e){
+    } catch (e) {
       secondLangSentenceText = AppLocalizations.of(context)!.noSentenceFound;
       print(e);
     }
@@ -195,7 +191,7 @@ class _AddWordState extends ConsumerState<AddWord> {
           height: 20,
         ),
         SizedBox(
-          width: 150,
+          // width: 150,
           height: 30,
           child: ElevatedButton(
             onPressed: () {
@@ -204,7 +200,12 @@ class _AddWordState extends ConsumerState<AddWord> {
             style: Theme.of(context).elevatedButtonTheme.style,
             child: Text(
               AppLocalizations.of(context)!.addWord,
-              style: Theme.of(context).textTheme.headlineSmall,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall!
+                  .copyWith(color: Colors.white),
+              // softWrap: true,
+              // textAlign: TextAlign.center,
             ),
           ),
         ),
@@ -215,10 +216,25 @@ class _AddWordState extends ConsumerState<AddWord> {
     );
   }
 
-  void handleAddWord(String appLanguageCode) {
+  void handleAddWord(String appLanguageCode) async{
+    FocusManager.instance.primaryFocus?.unfocus();
+
     if (!(ref.read(newLangToLearnWordProvider.notifier).state == '' ||
         ref.read(newAppLangWordProvider.notifier).state == '')) {
       addWord(widget.languageCodeToLearn, appLanguageCode);
+    } else if (ref.read(newLangToLearnWordProvider.notifier).state != '') {
+      await onEditingCompleteFirstLanguage(appLanguageCode);
+      addWord(widget.languageCodeToLearn, appLanguageCode);
+    } else if (ref.read(newAppLangWordProvider.notifier).state != '') {
+      await onEditingCompleteSecondLanguage(appLanguageCode);
+      addWord(widget.languageCodeToLearn, appLanguageCode);
+    } else {
+      SnackBarWidget.showSnackBar(
+        context,
+        AppLocalizations.of(context)!.pleaseFillBothFields(
+            L10n.getLanguageName(context, appLanguageCode),
+            L10n.getLanguageName(context, widget.languageCodeToLearn)),
+      );
     }
   }
 
@@ -228,7 +244,10 @@ class _AddWordState extends ConsumerState<AddWord> {
       final translator = GoogleTranslator();
       widget.handleIsLoading(true);
       final firstLangTranslation = await translator.translate(appLanguageWord,
-          from: 'auto', to: widget.languageCodeToLearn);
+          from: 'auto',
+          to: widget.languageCodeToLearn == 'he'
+              ? 'iw'
+              : widget.languageCodeToLearn);
       final engTranslation =
           await translator.translate(appLanguageWord, from: 'auto', to: 'en');
       widget.handleIsLoading(false);
