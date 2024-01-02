@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
 class MyThemeData {
-  
   static final ThemeData lightTheme = ThemeData(
+    // useMaterial3: false,
     //textfield border, cursor color, icon color, select user language color, word screen backgroung color
     primarySwatch: Colors.brown,
     // app bar color
     primaryColor: Colors.blue[100],
     hintColor: Colors.grey,
+    // disabledColor: Colors.grey,
     //iconButton background color
     splashColor: Colors.white,
     colorScheme: ColorScheme.light(
@@ -27,6 +28,11 @@ class MyThemeData {
             borderRadius: BorderRadius.circular(10.0),
           ),
         ),
+        textStyle: MaterialStateProperty.all<TextStyle>(
+          TextStyle(
+            foreground: Paint()..color = Colors.white,
+          ),
+        ),
       ),
     ),
     snackBarTheme: const SnackBarThemeData(
@@ -42,9 +48,10 @@ class MyThemeData {
         ),
       ),
       // labelText: 'Word',
-      // labelStyle: TextStyle(
-      //   color: Colors.black,
-      // ),
+      labelStyle: TextStyle(
+        fontSize: 14,
+        color: Colors.grey,
+      ),
       // hintText: 'Word',
       // hintStyle: TextStyle(
       //   color: Colors.grey,
@@ -53,25 +60,37 @@ class MyThemeData {
     // word card color
     cardColor: Colors.blue,
     cardTheme: const CardTheme(
+      color: Colors.blue,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(
           Radius.circular(10),
         ),
       ),
     ),
-    iconButtonTheme:  IconButtonThemeData(
-      style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-          const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(10),
-            ),
-          ),
-        ),
-      ),
-      
+    primaryIconTheme: const IconThemeData(
+      color: Colors.black,
     ),
+    iconTheme: const IconThemeData(
+      color: Colors.black,
+    ),
+    // iconButtonTheme:  IconButtonThemeData(
+    //   style: ButtonStyle(
+    //     // overlayColor: MaterialStateProperty.all<Color>(Colors.blue),
+    //     // shadowColor: MaterialStateProperty.all<Color>(Colors.black),
+    //     // surfaceTintColor: MaterialStateProperty.all<Color>(Colors.black),
+    //     // foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
+    //     // iconColor: MaterialStateProperty.all<Color>(Colors.black),
+    //     backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+    //     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+    //       const RoundedRectangleBorder(
+    //         borderRadius: BorderRadius.all(
+    //           Radius.circular(10),
+    //         ),
+    //       ),
+    //     ),
+    //   ),
+
+    // ),
     dialogTheme: const DialogTheme(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(
@@ -80,7 +99,7 @@ class MyThemeData {
       ),
     ),
     dialogBackgroundColor: Colors.blue[100],
-    
+
     listTileTheme: const ListTileThemeData(
       textColor: Colors.black,
       titleTextStyle: TextStyle(
@@ -147,7 +166,7 @@ class MyThemeData {
     ),
   );
 
-static final ThemeData darkTheme = ThemeData(
+  static final ThemeData darkTheme = ThemeData(
     primarySwatch: Colors.grey, // Adjust as needed
     primaryColor: Colors.black, // Change primary color for app bar
     hintColor: Colors.grey[400], // Adjust hint color
@@ -167,6 +186,11 @@ static final ThemeData darkTheme = ThemeData(
             borderRadius: BorderRadius.circular(10.0),
           ),
         ),
+        textStyle: MaterialStateProperty.all<TextStyle>(
+          TextStyle(
+            foreground: Paint()..color = Colors.white,
+          ),
+        ),
       ),
     ),
     snackBarTheme: const SnackBarThemeData(
@@ -181,6 +205,11 @@ static final ThemeData darkTheme = ThemeData(
           Radius.circular(20),
         ),
       ),
+      // labelText: 'Word',
+      labelStyle: TextStyle(
+        fontSize: 14,
+        color: Colors.grey,
+      ),
     ),
     cardColor: Colors.grey[800]!, // Change card color
     cardTheme: const CardTheme(
@@ -192,7 +221,7 @@ static final ThemeData darkTheme = ThemeData(
     ),
     iconButtonTheme: IconButtonThemeData(
       style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+        // backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
           const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(
@@ -225,14 +254,13 @@ static final ThemeData darkTheme = ThemeData(
     ),
     textTheme: const TextTheme(
       headlineLarge: TextStyle(
-        fontSize: 26.0,
-        fontWeight: FontWeight.bold,
-        fontFamily: 'Roboto',
-        // height: 0.12,
-        letterSpacing: 0.50,
-        color: Colors.white, // Change text color
-        overflow: TextOverflow.visible
-      ),
+          fontSize: 26.0,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'Roboto',
+          // height: 0.12,
+          letterSpacing: 0.50,
+          color: Colors.white, // Change text color
+          overflow: TextOverflow.visible),
       titleLarge: TextStyle(
         fontSize: 26.0,
         fontWeight: FontWeight.w400,
@@ -268,5 +296,4 @@ static final ThemeData darkTheme = ThemeData(
       ),
     ),
   );
-  
 }

@@ -91,9 +91,11 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
           decoration: decoration,
           textAlignVertical: TextAlignVertical.top,
           onChanged: (value) {
-            print('searchTermProvider: $value');
             widget.refreshWordsCallback(widget.languageCodeToLearn, term: value);
           },
+          style: const TextStyle(
+            height: 1.4,
+          )
         ),
       ),
     );

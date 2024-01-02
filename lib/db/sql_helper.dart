@@ -74,6 +74,23 @@ class SQLHelper {
     );
   }
 
+  static Future<bool> isWordExist(
+      String lang, String appLanguageWord, String languageToLearnWord) async {
+    final db = await SQLHelper.db();
+    final List<Map<String, dynamic>> maps = await db.query(
+      'words',
+      where:
+          'language = ? AND LOWER(first_lang) = ? AND LOWER(second_lang) = ?',
+      whereArgs: [
+        lang,
+        languageToLearnWord.toLowerCase(),
+        appLanguageWord.toLowerCase()
+      ],
+    );
+
+    return maps.isNotEmpty;
+  }
+
   static Future<int> createWord(Word word) async {
     final db = await SQLHelper.db();
 
@@ -138,6 +155,18 @@ class SQLHelper {
       );
       return word;
     });
+  }
+
+  //get number of words for a language
+  static Future<int> getWordsCount(String lang) async {
+    final db = await SQLHelper.db();
+    final List<Map<String, dynamic>> maps = await db.query(
+      'words',
+      where: 'language = ?',
+      whereArgs: [lang],
+    );
+
+    return maps.length;
   }
 
   static Future<List<Word>> getWordsBySearch(String lang, String search) async {
@@ -226,7 +255,6 @@ class SQLHelper {
       whereArgs: [id],
     );
 
-
     return res;
   }
 
@@ -245,7 +273,6 @@ class SQLHelper {
         File file = File(imageUrl);
         await file.delete();
       }
-
     } catch (e) {
       debugPrint('ErrorDelete: $e');
     }

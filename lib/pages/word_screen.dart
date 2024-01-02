@@ -1,4 +1,7 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,7 +13,9 @@ import 'package:words/db/sql_helper.dart';
 import 'package:words/pages/edit_word.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:words/providers/speed_provider.dart';
 import 'package:words/utills/snack_bar.dart';
+import 'package:words/utills/speak.dart';
 import 'package:words/utills/text_to_speech.dart';
 
 class WordScreen extends ConsumerStatefulWidget {
@@ -34,6 +39,7 @@ class _WordScreenState extends ConsumerState<WordScreen> {
   late Word word;
   late Function callback;
   String? userLanguageToLearn;
+  double imgHeight = 240;
 
   @override
   void initState() {
@@ -45,7 +51,39 @@ class _WordScreenState extends ConsumerState<WordScreen> {
         userLanguageToLearn = value;
       });
     });
+    getImgHeight().then((value) {
+      setState(() {
+        imgHeight = value;
+      });
+    });
   }
+
+  Future<double> getImgHeight() async {
+      File imageFile = File(word.image!);
+       Uint8List imageBytes = imageFile.readAsBytesSync();
+
+    Image image = Image.memory(
+      imageBytes,
+      fit: BoxFit.fitWidth,
+    );
+
+    Completer<ui.Image> completer = Completer<ui.Image>();
+    image.image.resolve(ImageConfiguration()).addListener(
+      ImageStreamListener((ImageInfo info, bool _) {
+        completer.complete(info.image);
+      }),
+    );
+
+    ui.Image imageUI = await completer.future;
+    double aspectRatio = imageUI.width / imageUI.height;
+    double screenWidth = MediaQuery.of(context).size.width;
+    int fittedHeight = (screenWidth / aspectRatio).round();
+  
+    return fittedHeight.toDouble();
+      // Uint8List imageBytes = imageFile.readAsBytesSync();
+      // ui.Image image = await decodeImageFromList(imageBytes);
+      // return image.height.toDouble();
+    }
 
   Future<String> getUserLanguageToLearn() async {
     final String? languageCodeToLearn =
@@ -57,14 +95,9 @@ class _WordScreenState extends ConsumerState<WordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // final user = ref.read(userProvider).asData!.value;
-
     final languageCodeToLearn = userLanguageToLearn!;
-    // ref.read(languageCodeToLearnProvider.notifier).state;
     final appLanguageCode = AppLocalizations.of(context)!.languageCode;
 
-    // final first_lang = ref.read(firstLangProvider.notifier).state;
-    // final second_lang = ref.read(secondLangProvider.notifier).state;
     Future<void> deleteWord(int id, String imgUrl, Word word) async {
       // Your existing deleteWord function logic
       await SQLHelper.deleteWord(id, imgUrl);
@@ -82,26 +115,8 @@ class _WordScreenState extends ConsumerState<WordScreen> {
       bool confirmDelete = await showDialog(
         context: context,
         builder: (BuildContext context) {
-          return AlertDialog(
-            content: Text(
-              AppLocalizations.of(context)!
-                  .confirmDelete(word.word![Language.appLanguageCode]!),
-            ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(false); // Return false on cancel
-                },
-                child: Text(AppLocalizations.of(context)!.cancel),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context)
-                      .pop(true); // Return true on confirmation
-                },
-                child: Text(AppLocalizations.of(context)!.delete),
-              ),
-            ],
+          return DeleteWordConfirmation(
+            word: word,
           );
         },
       );
@@ -111,7 +126,7 @@ class _WordScreenState extends ConsumerState<WordScreen> {
       }
     }
 
-    void showForm(int? id) async {
+    void editWordBottomSheet(int? id) async {
       showModalBottomSheet(
         context: context,
         elevation: 5,
@@ -136,41 +151,12 @@ class _WordScreenState extends ConsumerState<WordScreen> {
       );
     }
 
-    print('word.image: ${word.image}');
-    // final imgSrc = word.image!.split(',')[1];
+    final imgWidget = Image.memory(
+      File(word.image!).readAsBytesSync(),
+    );
 
-    // print('imgSrc: $imgSrc');
+    
 
-    // final decodedBytes = base64Decode(imgSrc);
-    // print('decodedBytes: $decodedBytes');
-    // const strUri = 'https://thumbor.forbes.com/thumbor/fit-in/900x510/https://www.forbes.com/advisor/wp-content/uploads/2023/07/top-20-small-dog-breeds.jpeg.jpg';
-    final imgWidget = Image.memory(File(word.image!).readAsBytesSync());
-    // Create an Image widget
-    // final imageWidget = Image.memory(
-    //   decodedBytes,
-    //   width: 200,
-    //   height: 200,
-    //   fit: BoxFit.cover,);
-
-    // Color color = Colors.black;
-    // List<Shadow> shadows = const <Shadow>[
-    //   Shadow(
-    //       // bottomLeft
-    //       offset: Offset(-1.0, -1.0),
-    //       color: Colors.black),
-    //   Shadow(
-    //       // bottomRight
-    //       offset: Offset(1.0, -1.0),
-    //       color: Colors.black),
-    //   Shadow(
-    //       // topRight
-    //       offset: Offset(1.0, 1.0),
-    //       color: Colors.black),
-    //   Shadow(
-    //       // topLeft
-    //       offset: Offset(-1.0, 1.0),
-    //       color: Colors.black),
-    // ];
     final wordLanguageToLearnSentence =
         word.sentence![Language.languageCodeToLearn]!;
     final wordAppLanguageSentence = word.sentence![Language.appLanguageCode]!;
@@ -183,27 +169,25 @@ class _WordScreenState extends ConsumerState<WordScreen> {
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: imgWidget.image,
-          filterQuality: FilterQuality.high,
-          fit: BoxFit.cover,
+      decoration: ShapeDecoration(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(25),
+          ),
         ),
-        // shape: const RoundedRectangleBorder(
-        //   borderRadius: BorderRadius.only(
-        //     topLeft: Radius.circular(25),
-        //     topRight: Radius.circular(25),
-        //   ),
-        // ),
+        color: Theme.of(context).colorScheme.background,
       ),
       child: Column(
-        // controller: controller,
         mainAxisAlignment: MainAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Container(
-            height: 200,
+            height: imgHeight > 300? 300 : imgHeight,
+            width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(
+                25,
+              ),
               image: DecorationImage(
                 image: imgWidget.image,
                 filterQuality: FilterQuality.high,
@@ -211,148 +195,275 @@ class _WordScreenState extends ConsumerState<WordScreen> {
               ),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.only(left: 30, right: 30),
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(28),
-              ),
-              color: Theme.of(context).colorScheme.background,
-              // color: Colors.white,
-            ),
+
+          ////////////////////////////////////////////////////////////////
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(
                   height: 40,
                 ),
-                Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 25),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              IconButton(
-                                onPressed: () {
-                                  TextToSpeech.speak(
-                                      word.word![Language.languageCodeToLearn]!,
-                                      languageCodeToLearn);
-                                },
-                                icon: const Icon(
-                                  Icons.volume_up,
-                                  color: Colors.blue,
-                                  size: 30,
+                SizedBox(
+                  height: 290,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Table(
+                          // defaultColumnWidth: FractionColumnWidth(0.33),
+                          columnWidths: const {
+                            0: FlexColumnWidth(0.15),
+                            1: FlexColumnWidth(0.10),
+                            2: FlexColumnWidth(0.50),
+                            3: FlexColumnWidth(0.25),
+                          },
+                          // border: TableBorder.all(
+                          //   color: Theme.of(context).colorScheme.secondary,
+                          //   width: 1,
+                          // ),
+                          children: [
+                            TableRow(
+                              children: [
+                                TableCell(
+                                  child: Speak(
+                                    text: word
+                                        .word![Language.languageCodeToLearn]!,
+                                    language: languageCodeToLearn,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                word.word![Language.languageCodeToLearn]!,
-                                style:
-                                    Theme.of(context).textTheme.headlineLarge,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      // const SizedBox(
-                      //   width: 50,
-                      // ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 25),
-                          child: Text(
-                            word.word![Language.appLanguageCode]!,
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                        ),
-                      ),
-                      // const SizedBox(
-                      //   width: 10,
-                      // ),
-                    ],
-                  ),
-                ),
-                const SizedBox(
-                  height: 60,
-                ),
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Align(
-                      alignment: isLanguageToLearnRTL
-                          ? Alignment.centerLeft
-                          : Alignment.centerRight,
-                      child: IconButton(
-                        onPressed: () {
-                          TextToSpeech.speak(
-                            word.sentence![Language.languageCodeToLearn]!,
-                            languageCodeToLearn,
-                          );
-                        },
-                        icon: const Icon(
-                          Icons.volume_up,
-                          color: Colors.blue,
-                          size: 30,
-                        ),
-                      ),
-                    ),
-                    // SizedBox(
-                    //   width: 100,
-                    // ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 30, right: 30),
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width *
-                              0.8, // Adjust width as needed
-                          child: Directionality(
-                            textDirection: isLanguageToLearnRTL
-                                ? TextDirection.rtl
-                                : TextDirection.ltr,
-                            child: Text(
-                              wordLanguageToLearnSentence,
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headlineMedium,
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
+                                TableCell(
+                                  child: SizedBox(),
+                                ),
+                                TableCell(
+                                  verticalAlignment:
+                                      TableCellVerticalAlignment.middle,
+                                  child: Center(
+                                    child: Text(
+                                      word.word![Language.languageCodeToLearn]!,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headlineLarge,
+                                    ),
+                                  ),
+                                ),
+                                TableCell(
+                                  child: SizedBox(),
+                                ),
+                              ],
                             ),
-                          ),
+                            TableRow(
+                              children: [
+                                TableCell(
+                                  child: Speak(
+                                    text: word.word![Language.appLanguageCode]!,
+                                    language: appLanguageCode,
+                                  ),
+                                ),
+                                TableCell(
+                                  child: SizedBox(),
+                                ),
+                                TableCell(
+                                  verticalAlignment:
+                                      TableCellVerticalAlignment.middle,
+                                  child: Center(
+                                    child: Text(
+                                      word.word![Language.appLanguageCode]!,
+                                      style:
+                                          Theme.of(context).textTheme.titleLarge,
+                                    ),
+                                  ),
+                                ),
+                                TableCell(
+                                  child: SizedBox(),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Container(
-                  padding: const EdgeInsets.only(left: 30, right: 30),
-                  child: Directionality(
-                    textDirection: isAppLanguageRTL
-                        ? TextDirection.rtl
-                        : TextDirection.ltr,
-                    child: Text(
-                      wordAppLanguageSentence,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontSize: 24,
-                            fontFamily: 'Roboto',
-                            fontWeight: FontWeight.w400,
-                            // height: 0.12,
-                            letterSpacing: 0.50,
-                            // color: Colors.black,
-                          ),
-                      softWrap:
-                          true, // This allows the text to wrap to the next line.
-                      maxLines:
-                          3, // Set the maximum number of lines before it wraps.
+
+                        ////////////////////////////////////////////////
+                        const SizedBox(
+                          height: 60,
+                        ),
+
+                        Table(
+                          // defaultColumnWidth: FractionColumnWidth(0.33),
+                          columnWidths: const {
+                            0: FlexColumnWidth(0.15),
+                            1: FlexColumnWidth(0.85),
+                          },
+                          // border: TableBorder.all(
+                          //   color: Theme.of(context).colorScheme.secondary,
+                          //   width: 1,
+                          // ),
+                          children: [
+                            TableRow(
+                              children: [
+                                TableCell(
+                                  verticalAlignment:
+                                      TableCellVerticalAlignment.middle,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                      bottom: 20,
+                                    ),
+                                    child: Speak(
+                                      text: word.sentence![
+                                          Language.languageCodeToLearn]!,
+                                      language: languageCodeToLearn,
+                                    ),
+                                  ),
+                                ),
+                                TableCell(
+                                  verticalAlignment:
+                                      TableCellVerticalAlignment.middle,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                      bottom: 10,
+                                    ),
+                                    child: SizedBox(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.8, // Adjust width as needed
+                                      child: Directionality(
+                                        textDirection: isLanguageToLearnRTL
+                                            ? TextDirection.rtl
+                                            : TextDirection.ltr,
+                                        child: Text(
+                                          wordLanguageToLearnSentence,
+                                          textAlign: TextAlign.center,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .headlineMedium,
+                                          maxLines: 5,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            TableRow(
+                              children: [
+                                TableCell(
+                                  verticalAlignment:
+                                      TableCellVerticalAlignment.middle,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                      bottom: 20,
+                                    ),
+                                    child: Speak(
+                                      text: word
+                                          .sentence![Language.appLanguageCode]!,
+                                      language: appLanguageCode,
+                                    ),
+                                  ),
+                                ),
+                                TableCell(
+                                  verticalAlignment:
+                                      TableCellVerticalAlignment.middle,
+                                  child: SizedBox(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.8, // Adjust width as needed
+                                    child: Directionality(
+                                      textDirection: isAppLanguageRTL
+                                          ? TextDirection.rtl
+                                          : TextDirection.ltr,
+                                      child: Text(
+                                        wordAppLanguageSentence,
+                                        textAlign: TextAlign.center,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium
+                                            ?.copyWith(
+                                              fontSize: 24,
+                                              fontFamily: 'Roboto',
+                                              fontWeight: FontWeight.w400,
+                                              // height: 0.12,
+                                              letterSpacing: 0.50,
+                                              // color: Colors.black,
+                                            ),
+                                        softWrap:
+                                            true, // This allows the text to wrap to the next line.
+                                        maxLines:
+                                            5, // Set the maximum number of lines before it wraps.
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+
+                        // Stack(
+                        //   alignment: Alignment.center,
+                        //   children: [
+                        //     Align(
+                        //       alignment: isLanguageToLearnRTL
+                        //           ? Alignment.centerLeft
+                        //           : Alignment.centerRight,
+                        //       child: Speak(
+                        //         text: word.sentence![Language.languageCodeToLearn]!,
+                        //         language: languageCodeToLearn,
+                        //       ),
+                        //     ),
+                        //     // SizedBox(
+                        //     //   width: 100,
+                        //     // ),
+                        //     Padding(
+                        //       padding: const EdgeInsets.only(left: 30, right: 30),
+                        //       child: Align(
+                        //         alignment: Alignment.center,
+                        //         child: SizedBox(
+                        //           width: MediaQuery.of(context).size.width *
+                        //               0.8, // Adjust width as needed
+                        //           child: Directionality(
+                        //             textDirection: isLanguageToLearnRTL
+                        //                 ? TextDirection.rtl
+                        //                 : TextDirection.ltr,
+                        //             child: Text(
+                        //               wordLanguageToLearnSentence,
+                        //               textAlign: TextAlign.center,
+                        //               style: Theme.of(context).textTheme.headlineMedium,
+                        //               maxLines: 3,
+                        //               overflow: TextOverflow.ellipsis,
+                        //             ),
+                        //           ),
+                        //         ),
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
+                        // const SizedBox(
+                        //   height: 20,
+                        // ),
+                        // Container(
+                        //   padding: const EdgeInsets.only(left: 30, right: 30),
+                        //   child: Directionality(
+                        //     textDirection: isAppLanguageRTL
+                        //         ? TextDirection.rtl
+                        //         : TextDirection.ltr,
+                        //     child: Text(
+                        //       wordAppLanguageSentence,
+                        //       textAlign: TextAlign.center,
+                        //       style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        //             fontSize: 24,
+                        //             fontFamily: 'Roboto',
+                        //             fontWeight: FontWeight.w400,
+                        //             // height: 0.12,
+                        //             letterSpacing: 0.50,
+                        //             // color: Colors.black,
+                        //           ),
+                        //       softWrap:
+                        //           true, // This allows the text to wrap to the next line.
+                        //       maxLines:
+                        //           3, // Set the maximum number of lines before it wraps.
+                        //     ),
+                        //   ),
+                        // ),
+                      ],
                     ),
                   ),
                 ),
@@ -371,7 +482,7 @@ class _WordScreenState extends ConsumerState<WordScreen> {
                       ),
                       padding: EdgeInsets.all(8), // Add some padding
                       child: IconButton(
-                        onPressed: () => showForm(word.id),
+                        onPressed: () => editWordBottomSheet(word.id),
                         icon: const Icon(
                           Icons.edit,
                           color: Colors.blue, // Choose a modern color
@@ -410,6 +521,47 @@ class _WordScreenState extends ConsumerState<WordScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void speak(String text, String languageCodeToLearn) {
+    TextToSpeech.speak(
+      text,
+      languageCodeToLearn,
+      ref.read(speedProvider.notifier).state,
+    );
+  }
+}
+
+class DeleteWordConfirmation extends StatelessWidget {
+  const DeleteWordConfirmation({
+    required this.word,
+    super.key,
+  });
+
+  final Word word;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      content: Text(
+        AppLocalizations.of(context)!
+            .confirmDelete(word.word![Language.appLanguageCode]!),
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop(false); // Return false on cancel
+          },
+          child: Text(AppLocalizations.of(context)!.cancel),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop(true); // Return true on confirmation
+          },
+          child: Text(AppLocalizations.of(context)!.delete),
+        ),
+      ],
     );
   }
 }

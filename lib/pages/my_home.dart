@@ -1,13 +1,16 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pixabay_picker/model/pixabay_media.dart';
 import 'package:pixabay_picker/pixabay_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:words/db/sql_helper.dart';
+import 'package:words/pages/app_drawer.dart';
 import 'package:words/pages/main_screen.dart';
 import 'package:words/pages/user_language_picker.dart';
+import 'package:words/utills/my_ad.dart';
 import 'package:words/utills/word_card.dart';
 import 'package:words/models/word/word.dart';
 import 'package:words/pages/custom_search_bar.dart';
@@ -22,6 +25,9 @@ class MyHomePage extends StatefulWidget {
     Key? key,
   }) : super(key: key);
 
+    static _MyHomePageState? of(BuildContext context) =>
+      context.findAncestorStateOfType<_MyHomePageState>();
+
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -33,11 +39,38 @@ class _MyHomePageState extends State<MyHomePage> {
   String languageCodeToLearn = '';
   var isFavorite = true;
   var imageUrl = '';
+  var isDrawerOpen = false;
+
+  late BannerAd bannerAd;
+  bool isAdLoaded = false;
+
+  initBannerAd() {
+    bannerAd = BannerAd(
+      adUnitId: 'ca-app-pub-3940256099942544/6300978111',
+      size: AdSize.banner,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            isAdLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          // Releases an ad resource when it fails to load
+          ad.dispose();
+
+          print('Ad load failed (code=${error.code} message=${error.message})');
+        },
+      ),
+    );
+    bannerAd.load();
+  }
 
   void _refreshWords(String lang, {String query = ''}) async {
     final data = await SQLHelper.getWordsBySearch(lang, query);
     setState(() {
       _words = data;
+      isFavorite = true;
       // _isLouding = false;
     });
   }
@@ -60,6 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     setUserLanguageToLearn();
+    initBannerAd();
   }
 
   void setUserLanguageToLearn() {
@@ -121,18 +155,36 @@ class _MyHomePageState extends State<MyHomePage> {
 
     PixabayPicker pixabayPicker = PixabayPicker(apiKey: pixabayApiKey);
 
+    bool isTakeFirstImage = false;
+    String limit = '';
+    //isTakeFirstImage from shared preferences
+    SharedPreferences.getInstance().then((prefs) {
+      isTakeFirstImage = prefs.getBool('isTakeFirstImage') ?? false;
+    });
+    if (isTakeFirstImage) {
+      limit = '&per_page=3';
+    }
+
     PixabayResponse? pixabayResponse = await pixabayPicker.api!
         .requestImagesWithKeyword(
-            keyword: word, category: "&orientation=horizontal");
+            keyword: word, category: "&orientation=horizontal$limit");
     handleIsLoading(false);
     // ignore: use_build_context_synchronously
-    await selectImage(pixabayResponse!);
+    if (!isTakeFirstImage || isEdit) {
+      await selectImage(pixabayResponse!);
+    }
+    else{
+      setState(() {
+        imageUrl =
+        pixabayResponse!.hits![0].getDownloadLink(res: Resolution.medium)!;
+      });
+    }
 
     if (imageUrl == '' && !isEdit) {
       print('imageUrl: $imageUrl');
       setState(() {
         imageUrl =
-            pixabayResponse.hits![0].getDownloadLink(res: Resolution.medium)!;
+            pixabayResponse!.hits![0].getDownloadLink(res: Resolution.medium)!;
       });
     }
     print('imageUrl: $imageUrl');
@@ -207,12 +259,18 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+ 
+
   @override
   Widget build(BuildContext context) {
     final appLanguageCode = AppLocalizations.of(context)!.languageCode;
     print('appLanguageCode: $appLanguageCode');
 
     return Scaffold(
+      endDrawer: AppDrawer(
+        refreshWordsCallback: refreshWordsCallback,
+        setUserLanguageToLearn: setUserLanguageToLearn,
+      ),
       body: Stack(children: [
         NotificationListener<ScrollNotification>(
           onNotification: (notification) {
@@ -222,75 +280,64 @@ class _MyHomePageState extends State<MyHomePage> {
             }
             return false; // Return false to allow other listeners to process the notification.
           },
-          child: CustomScrollView(
-            slivers: [
-              appBar(context),
-              SliverAppBar(
-                floating: true,
-                pinned: true,
-                expandedHeight: 100,
-                backgroundColor: Theme.of(context).primaryColor,
-                // backgroundColor: Color.fromARGB(255, 196, 234, 244),
-                flexibleSpace: AddWord(
-                  languageCodeToLearn: languageCodeToLearn,
-                  refreshWordsCallback: refreshWordsCallback,
-                  handleIsLoading: handleIsLoading,
-                  manageDownloadImage: manageDownloadImage,
+          child: Container(
+            color: Theme.of(context).canvasColor,
+            child: CustomScrollView(
+              slivers: [
+                appBar(context),
+                SliverAppBar(
+                  automaticallyImplyLeading: false,
+                  floating: true,
+                  pinned: true,
+                  expandedHeight: 100,
+                  backgroundColor: Theme.of(context).primaryColor,
+                  actions: [Container()],
+                  // backgroundColor: Color.fromARGB(255, 196, 234, 244),
+                  flexibleSpace: AddWord(
+                    languageCodeToLearn: languageCodeToLearn,
+                    refreshWordsCallback: refreshWordsCallback,
+                    handleIsLoading: handleIsLoading,
+                    manageDownloadImage: manageDownloadImage,
+                  ),
                 ),
-              ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    // print('isFavoriteWord: ${_words[index].isFavorite}');
+                // SliverToBoxAdapter(
+                //   child: Divider(),
+                // ),
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      // print('isFavoriteWord: ${_words[index].isFavorite}');
 
-                    return WordCard(
-                      word: _words[index],
-                      callback: refreshWordsCallback,
-                      manageDownloadImage: manageDownloadImage,
-                      starColor: _words[index].isFavorite
-                          ? Colors.yellow[700]!
-                          : Colors.grey[400]!,
-                    );
-                  },
-                  childCount: _words.length,
+                      return WordCard(
+                        word: _words[index],
+                        callback: refreshWordsCallback,
+                        manageDownloadImage: manageDownloadImage,
+                        starColor: _words[index].isFavorite
+                            ? Colors.yellow[700]!
+                            : Colors.grey[400]!,
+                      );
+                    },
+                    childCount: _words.length,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         if (_isLouding)
           const Center(
             child: CircularProgressIndicator(),
           ),
-        // all rights reserved
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: GestureDetector(
-                onTap: () async{
-                  //open telegram
-                  // try {
-                    const url = 'https://linkedin.com/in/elchananbloom';
-                    final uri = Uri.parse(url);
-                    await launchUrl(uri,
-                    mode: LaunchMode.externalApplication);
-                  // } catch (e) {
-                  //   print(e);
-                  // }
-                },
-                child: Text("© Elchanan Bloom.",
-                    // AppLocalizations.of(context)!.allRightsReserved,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: Colors.grey[400],
-                        )),
-              ),
-            ),
-          ),
-        ),
       ]),
+      bottomNavigationBar: isAdLoaded
+          ? SizedBox(
+              height: bannerAd.size.height.toDouble(),
+              width: bannerAd.size.width.toDouble(),
+              child: AdWidget(
+                ad: bannerAd,
+              ),
+            )
+          : SizedBox(),
     );
   }
 
@@ -314,19 +361,6 @@ class _MyHomePageState extends State<MyHomePage> {
             }
           },
         ),
-        Transform.rotate(
-          angle:
-              3.14159, // Angle in radians to rotate the IconButton (adjust as needed)
-          child: IconButton(
-            icon: Icon(
-              Icons.nightlight_round_sharp,
-              color: Theme.of(context).iconTheme.color,
-            ),
-            onPressed: () {
-              MainScreen.of(context)!.handleChangeTheme();
-            },
-          ),
-        )
       ],
     );
     return SliverAppBar(
@@ -334,6 +368,7 @@ class _MyHomePageState extends State<MyHomePage> {
       pinned: true,
       expandedHeight: 100,
       backgroundColor: Theme.of(context).primaryColor,
+      // leading:
       actions: [
         Expanded(
           child: Padding(
@@ -359,13 +394,23 @@ class _MyHomePageState extends State<MyHomePage> {
                 Expanded(
                   child: Align(
                     alignment: Alignment.centerLeft,
-                    child: UserLanguagePickerWidget(
-                      isUserLanguagePicker: true,
-                      refreshWordsCallback: refreshWordsCallback,
-                      setUserLanguageToLearn: setUserLanguageToLearn,
-                      isAddLanguageToLearn: false,
-                      isAppLang: false,
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        return IconButton(
+                          icon: const Icon(Icons.menu),
+                          onPressed: () {
+                            Scaffold.of(context).openEndDrawer();
+                          },
+                        );
+                      },
                     ),
+                    // UserLanguagePickerWidget(
+                    //   isUserLanguagePicker: true,
+                    //   refreshWordsCallback: refreshWordsCallback,
+                    //   setUserLanguageToLearn: setUserLanguageToLearn,
+                    //   isAddLanguageToLearn: false,
+                    //   isAppLang: false,
+                    // ),
                   ),
                 ),
               ],

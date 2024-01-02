@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:words/l10n.dart';
 import 'package:words/pages/app_localization_singleton.dart';
 import 'package:words/pages/my_home.dart';
@@ -42,13 +43,27 @@ class _MainScreenState extends riverpod.ConsumerState<MainScreen> {
   @override
   void initState() {
     super.initState();
-    _theme = ThemeMode.system;
+    //get themeMode from shared preferences
+    //-1: system, 0: dark, 1: light
+    SharedPreferences.getInstance().then((prefs) {
+      final themeMode = prefs.getInt('themeMode') ?? -1;
+      setState(() {
+        _theme = themeMode == 0 ? ThemeMode.dark : themeMode == 1 ? ThemeMode.light : ThemeMode.system;
+      });
+    });
+
+    // _theme = ThemeMode.system;
   }
+
+  get theme => _theme;
 
   handleChangeTheme() {
     print('handleChangeTheme');
     setState(() {
       _theme = _theme == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+    });
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setInt('themeMode', _theme == ThemeMode.dark ? 0 : 1);
     });
   }
 
@@ -92,10 +107,10 @@ class _MainScreenState extends riverpod.ConsumerState<MainScreen> {
               GlobalCupertinoLocalizations.delegate,
             ],
             home:
-            //  widget.isUserRegistered
-            //     ?  MyHomePage(
-            //     )
-            //     : 
+             widget.isUserRegistered
+                ?  MyHomePage(
+                )
+                : 
                 const SelectLanguage(),
           );
         });

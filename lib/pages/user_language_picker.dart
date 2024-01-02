@@ -17,6 +17,7 @@ class UserLanguagePickerWidget extends riverpod.ConsumerStatefulWidget {
     this.setSelectedLanguage,
     this.isAppLang,
     this.isAddLanguageToLearn,
+    this.wordsCount,
   }) : super(key: key);
 
   final bool? isUserLanguagePicker;
@@ -25,6 +26,7 @@ class UserLanguagePickerWidget extends riverpod.ConsumerStatefulWidget {
   final Function(String)? setSelectedLanguage;
   final bool? isAppLang;
   final bool? isAddLanguageToLearn;
+  final Function()? wordsCount;
 
   @override
   riverpod.ConsumerState<UserLanguagePickerWidget> createState() =>
@@ -82,6 +84,7 @@ class _LanguagePickerWidgetState
           icon: Container(width: 0),
           onChanged: (String? value) {
             handleAddLanguage(value, context);
+            widget.wordsCount!();
           },
           items: _userLanguages.map((valueItem) {
             String a(String b) {

@@ -284,6 +284,7 @@ class _EditWordState extends State<EditWord> {
                               AppLocalizations.of(context)!.translateTo(
                                   L10n.getLanguageName(
                                       context, widget.languageCodeToLearn)),
+                                      // style: Theme.of(context).elevatedButtonTheme.style?.textStyle!,
                             ),
                           ),
                         ),

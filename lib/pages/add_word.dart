@@ -37,6 +37,39 @@ class _AddWordState extends ConsumerState<AddWord> {
   final FocusNode _secondFocusNode = FocusNode();
   final TextEditingController _firstController = TextEditingController();
   final TextEditingController _secondController = TextEditingController();
+  var isFirstFocused = false;
+  var isSecondFocused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Set the initial values.
+    ref.read(newLangToLearnWordProvider.notifier).state = '';
+    ref.read(newAppLangWordProvider.notifier).state = '';
+    ref.read(newEnglishWordProvider.notifier).state = '';
+    _firstFocusNode.addListener(() {
+      if (_firstFocusNode.hasFocus) {
+        setState(() {
+          isFirstFocused = true;
+        });
+      } else {
+        setState(() {
+          isFirstFocused = false;
+        });
+      }
+    });
+    _secondFocusNode.addListener(() {
+      if (_secondFocusNode.hasFocus) {
+        setState(() {
+          isSecondFocused = true;
+        });
+      } else {
+        setState(() {
+          isSecondFocused = false;
+        });
+      }
+    });
+  }
 
   String removeDiacritics(String input) {
     return input.replaceAll(RegExp(r'[\u0591-\u05C7]'), '');
@@ -44,6 +77,33 @@ class _AddWordState extends ConsumerState<AddWord> {
 
   void addWord(String languageCodeToLearn, String appLanguageCode) async {
     final engWord = ref.read(newEnglishWordProvider.notifier).state.trim();
+    final appLanguageWord =
+        removeDiacritics(ref.read(newAppLangWordProvider.notifier).state)
+            .trim();
+    final languageToLearnWord =
+        removeDiacritics(ref.read(newLangToLearnWordProvider.notifier).state);
+    //check if word already exists
+    final wordExists = await SQLHelper.isWordExist(languageCodeToLearn,
+        appLanguageWord, languageToLearnWord);
+        print('wordExists: $wordExists');
+    if (wordExists) {
+      //TODO add language
+      SnackBarWidget.showSnackBar(
+        context,
+        "word already exists"
+        // AppLocalizations.of(context)!.wordAlreadyExists(
+        //     L10n.getLanguageName(context, appLanguageCode),
+        //     L10n.getLanguageName(context, languageCodeToLearn)),
+      );
+      ref.read(newEnglishWordProvider.notifier).state = '';
+    ref.read(newAppLangWordProvider.notifier).state = '';
+    ref.read(newLangToLearnWordProvider.notifier).state = '';
+
+    _firstController.clear();
+    _secondController.clear();
+    FocusScope.of(context).unfocus();
+      return;
+    }
     String engSentence = '';
     var firstLangSentence;
     var secondLangSentence;
@@ -95,12 +155,8 @@ class _AddWordState extends ConsumerState<AddWord> {
     final word = Word(
       language: languageCodeToLearn,
       word: {
-        Language.appLanguageCode:
-            removeDiacritics(ref.read(newAppLangWordProvider.notifier).state)
-                .trim(),
-        Language.languageCodeToLearn: removeDiacritics(
-                ref.read(newLangToLearnWordProvider.notifier).state)
-            .trim(),
+        Language.appLanguageCode: appLanguageWord,
+        Language.languageCodeToLearn: languageToLearnWord,
         Language.english: engWord,
       },
       sentence: {
@@ -157,7 +213,27 @@ class _AddWordState extends ConsumerState<AddWord> {
               child: TextField(
                 controller: _firstController,
                 focusNode: _firstFocusNode,
-                decoration: getWordDecoration(widget.languageCodeToLearn),
+                decoration:
+                    getWordDecoration(widget.languageCodeToLearn).copyWith(
+                  suffixIcon: isFirstFocused
+                      ? IconButton(
+                          onPressed: () {
+                            _firstController.clear();
+                            ref
+                                .read(newLangToLearnWordProvider.notifier)
+                                .state = '';
+                            FocusScope.of(context).unfocus();
+                          },
+                          icon: const Icon(
+                            Icons.clear,
+                            size: 15,
+                          ),
+                        )
+                      : null,
+                ),
+                style: const TextStyle(
+                  height: 1,
+                ),
                 onChanged: (value) {
                   ref.read(newLangToLearnWordProvider.notifier).state = value;
                 },
@@ -176,7 +252,25 @@ class _AddWordState extends ConsumerState<AddWord> {
               child: TextField(
                 controller: _secondController,
                 focusNode: _secondFocusNode,
-                decoration: getWordDecoration(appLanguageCode),
+                decoration: getWordDecoration(appLanguageCode).copyWith(
+                  suffixIcon: isSecondFocused
+                      ? IconButton(
+                          onPressed: () {
+                            _secondController.clear();
+                            ref.read(newAppLangWordProvider.notifier).state =
+                                '';
+                            FocusScope.of(context).unfocus();
+                          },
+                          icon: const Icon(
+                            Icons.clear,
+                            size: 15,
+                          ),
+                        )
+                      : null,
+                ),
+                style: const TextStyle(
+                  height: 1,
+                ),
                 onChanged: (value) {
                   ref.read(newAppLangWordProvider.notifier).state = value;
                 },
@@ -216,7 +310,7 @@ class _AddWordState extends ConsumerState<AddWord> {
     );
   }
 
-  void handleAddWord(String appLanguageCode) async{
+  void handleAddWord(String appLanguageCode) async {
     FocusManager.instance.primaryFocus?.unfocus();
 
     if (!(ref.read(newLangToLearnWordProvider.notifier).state == '' ||

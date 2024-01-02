@@ -45,8 +45,14 @@ class _WordCardState extends State<WordCard> {
         onTap: () {
           showModalBottomSheet(
             context: context,
-            elevation: 5,
+            elevation: 0,
             isScrollControlled: true,
+            shape: const RoundedRectangleBorder(
+              // <-- SEE HERE
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(25),
+              ),
+            ),
             builder: (BuildContext context) {
               return WordScreen(
                 word: widget.word,
