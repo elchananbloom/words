@@ -11,11 +11,12 @@ import 'package:words/models/word/word.dart';
 import 'package:words/models/enums.dart';
 import 'package:words/db/sql_helper.dart';
 import 'package:words/pages/edit_word.dart';
+import 'package:words/widgets/delete_confirmation_widget.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:words/providers/speed_provider.dart';
-import 'package:words/utills/snack_bar.dart';
-import 'package:words/utills/speak.dart';
+import 'package:words/widgets/snack_bar_widget.dart';
+import 'package:words/widgets/speak_widget.dart';
 import 'package:words/utills/text_to_speech.dart';
 
 class WordScreen extends ConsumerStatefulWidget {
@@ -36,9 +37,9 @@ class WordScreen extends ConsumerStatefulWidget {
 }
 
 class _WordScreenState extends ConsumerState<WordScreen> {
-  late Word word;
-  late Function callback;
-  String? userLanguageToLearn;
+  Word word = Word();
+  Function callback = () {};
+  String userLanguageToLearn = '';
   double imgHeight = 240;
 
   @override
@@ -59,8 +60,8 @@ class _WordScreenState extends ConsumerState<WordScreen> {
   }
 
   Future<double> getImgHeight() async {
-      File imageFile = File(word.image!);
-       Uint8List imageBytes = imageFile.readAsBytesSync();
+    File imageFile = File(word.image!);
+    Uint8List imageBytes = imageFile.readAsBytesSync();
 
     Image image = Image.memory(
       imageBytes,
@@ -78,12 +79,9 @@ class _WordScreenState extends ConsumerState<WordScreen> {
     double aspectRatio = imageUI.width / imageUI.height;
     double screenWidth = MediaQuery.of(context).size.width;
     int fittedHeight = (screenWidth / aspectRatio).round();
-  
+
     return fittedHeight.toDouble();
-      // Uint8List imageBytes = imageFile.readAsBytesSync();
-      // ui.Image image = await decodeImageFromList(imageBytes);
-      // return image.height.toDouble();
-    }
+  }
 
   Future<String> getUserLanguageToLearn() async {
     final String? languageCodeToLearn =
@@ -95,8 +93,9 @@ class _WordScreenState extends ConsumerState<WordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final languageCodeToLearn = userLanguageToLearn!;
+    final languageCodeToLearn = userLanguageToLearn;
     final appLanguageCode = AppLocalizations.of(context)!.languageCode;
+    var imgWidget;
 
     Future<void> deleteWord(int id, String imgUrl, Word word) async {
       // Your existing deleteWord function logic
@@ -151,11 +150,13 @@ class _WordScreenState extends ConsumerState<WordScreen> {
       );
     }
 
-    final imgWidget = Image.memory(
-      File(word.image!).readAsBytesSync(),
-    );
-
-    
+    try {
+      imgWidget = Image.memory(
+        File(word.image!).readAsBytesSync(),
+      );
+    } catch (e) {
+      imgWidget = null;
+    }
 
     final wordLanguageToLearnSentence =
         word.sentence![Language.languageCodeToLearn]!;
@@ -170,7 +171,7 @@ class _WordScreenState extends ConsumerState<WordScreen> {
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
       decoration: ShapeDecoration(
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
             top: Radius.circular(25),
           ),
@@ -182,18 +183,19 @@ class _WordScreenState extends ConsumerState<WordScreen> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Container(
-            height: imgHeight > 300? 300 : imgHeight,
+            height: imgHeight > 300 ? 300 : imgHeight,
             width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(
-                25,
-              ),
-              image: DecorationImage(
-                image: imgWidget.image,
-                filterQuality: FilterQuality.high,
-                fit: BoxFit.fitWidth,
-              ),
-            ),
+                borderRadius: BorderRadius.circular(
+                  25,
+                ),
+                image: imgWidget != null
+                    ? DecorationImage(
+                        image: imgWidget.image,
+                        filterQuality: FilterQuality.high,
+                        fit: BoxFit.fitWidth,
+                      )
+                    : null),
           ),
 
           ////////////////////////////////////////////////////////////////
@@ -212,22 +214,17 @@ class _WordScreenState extends ConsumerState<WordScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Table(
-                          // defaultColumnWidth: FractionColumnWidth(0.33),
                           columnWidths: const {
                             0: FlexColumnWidth(0.15),
                             1: FlexColumnWidth(0.10),
                             2: FlexColumnWidth(0.50),
                             3: FlexColumnWidth(0.25),
                           },
-                          // border: TableBorder.all(
-                          //   color: Theme.of(context).colorScheme.secondary,
-                          //   width: 1,
-                          // ),
                           children: [
                             TableRow(
                               children: [
                                 TableCell(
-                                  child: Speak(
+                                  child: SpeakWidget(
                                     text: word
                                         .word![Language.languageCodeToLearn]!,
                                     language: languageCodeToLearn,
@@ -256,7 +253,7 @@ class _WordScreenState extends ConsumerState<WordScreen> {
                             TableRow(
                               children: [
                                 TableCell(
-                                  child: Speak(
+                                  child: SpeakWidget(
                                     text: word.word![Language.appLanguageCode]!,
                                     language: appLanguageCode,
                                   ),
@@ -270,8 +267,9 @@ class _WordScreenState extends ConsumerState<WordScreen> {
                                   child: Center(
                                     child: Text(
                                       word.word![Language.appLanguageCode]!,
-                                      style:
-                                          Theme.of(context).textTheme.titleLarge,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge,
                                     ),
                                   ),
                                 ),
@@ -289,15 +287,10 @@ class _WordScreenState extends ConsumerState<WordScreen> {
                         ),
 
                         Table(
-                          // defaultColumnWidth: FractionColumnWidth(0.33),
                           columnWidths: const {
                             0: FlexColumnWidth(0.15),
                             1: FlexColumnWidth(0.85),
                           },
-                          // border: TableBorder.all(
-                          //   color: Theme.of(context).colorScheme.secondary,
-                          //   width: 1,
-                          // ),
                           children: [
                             TableRow(
                               children: [
@@ -308,7 +301,7 @@ class _WordScreenState extends ConsumerState<WordScreen> {
                                     padding: const EdgeInsets.only(
                                       bottom: 20,
                                     ),
-                                    child: Speak(
+                                    child: SpeakWidget(
                                       text: word.sentence![
                                           Language.languageCodeToLearn]!,
                                       language: languageCodeToLearn,
@@ -353,7 +346,7 @@ class _WordScreenState extends ConsumerState<WordScreen> {
                                     padding: const EdgeInsets.only(
                                       bottom: 20,
                                     ),
-                                    child: Speak(
+                                    child: SpeakWidget(
                                       text: word
                                           .sentence![Language.appLanguageCode]!,
                                       language: appLanguageCode,
@@ -364,8 +357,8 @@ class _WordScreenState extends ConsumerState<WordScreen> {
                                   verticalAlignment:
                                       TableCellVerticalAlignment.middle,
                                   child: SizedBox(
-                                    width: MediaQuery.of(context).size.width *
-                                        0.8, // Adjust width as needed
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.8,
                                     child: Directionality(
                                       textDirection: isAppLanguageRTL
                                           ? TextDirection.rtl
@@ -396,73 +389,6 @@ class _WordScreenState extends ConsumerState<WordScreen> {
                             ),
                           ],
                         ),
-
-                        // Stack(
-                        //   alignment: Alignment.center,
-                        //   children: [
-                        //     Align(
-                        //       alignment: isLanguageToLearnRTL
-                        //           ? Alignment.centerLeft
-                        //           : Alignment.centerRight,
-                        //       child: Speak(
-                        //         text: word.sentence![Language.languageCodeToLearn]!,
-                        //         language: languageCodeToLearn,
-                        //       ),
-                        //     ),
-                        //     // SizedBox(
-                        //     //   width: 100,
-                        //     // ),
-                        //     Padding(
-                        //       padding: const EdgeInsets.only(left: 30, right: 30),
-                        //       child: Align(
-                        //         alignment: Alignment.center,
-                        //         child: SizedBox(
-                        //           width: MediaQuery.of(context).size.width *
-                        //               0.8, // Adjust width as needed
-                        //           child: Directionality(
-                        //             textDirection: isLanguageToLearnRTL
-                        //                 ? TextDirection.rtl
-                        //                 : TextDirection.ltr,
-                        //             child: Text(
-                        //               wordLanguageToLearnSentence,
-                        //               textAlign: TextAlign.center,
-                        //               style: Theme.of(context).textTheme.headlineMedium,
-                        //               maxLines: 3,
-                        //               overflow: TextOverflow.ellipsis,
-                        //             ),
-                        //           ),
-                        //         ),
-                        //       ),
-                        //     ),
-                        //   ],
-                        // ),
-                        // const SizedBox(
-                        //   height: 20,
-                        // ),
-                        // Container(
-                        //   padding: const EdgeInsets.only(left: 30, right: 30),
-                        //   child: Directionality(
-                        //     textDirection: isAppLanguageRTL
-                        //         ? TextDirection.rtl
-                        //         : TextDirection.ltr,
-                        //     child: Text(
-                        //       wordAppLanguageSentence,
-                        //       textAlign: TextAlign.center,
-                        //       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        //             fontSize: 24,
-                        //             fontFamily: 'Roboto',
-                        //             fontWeight: FontWeight.w400,
-                        //             // height: 0.12,
-                        //             letterSpacing: 0.50,
-                        //             // color: Colors.black,
-                        //           ),
-                        //       softWrap:
-                        //           true, // This allows the text to wrap to the next line.
-                        //       maxLines:
-                        //           3, // Set the maximum number of lines before it wraps.
-                        //     ),
-                        //   ),
-                        // ),
                       ],
                     ),
                   ),
@@ -476,16 +402,15 @@ class _WordScreenState extends ConsumerState<WordScreen> {
                     Container(
                       decoration: BoxDecoration(
                         color: Theme.of(context).splashColor,
-                        // Colors.grey[200], // Use a subtle background color
                         borderRadius: BorderRadius.circular(
-                            8), // Slightly rounded corners
+                            8),
                       ),
-                      padding: EdgeInsets.all(8), // Add some padding
+                      padding: const EdgeInsets.all(8),
                       child: IconButton(
                         onPressed: () => editWordBottomSheet(word.id),
                         icon: const Icon(
                           Icons.edit,
-                          color: Colors.blue, // Choose a modern color
+                          color: Colors.blue,
                         ),
                       ),
                     ),
@@ -499,7 +424,7 @@ class _WordScreenState extends ConsumerState<WordScreen> {
                         borderRadius: BorderRadius.circular(
                             8), // Slightly rounded corners
                       ),
-                      padding: EdgeInsets.all(8), // Add some padding
+                      padding: const EdgeInsets.all(8), // Add some padding
                       child: IconButton(
                         onPressed: () {
                           deleteWordConfirmation(
@@ -533,35 +458,3 @@ class _WordScreenState extends ConsumerState<WordScreen> {
   }
 }
 
-class DeleteWordConfirmation extends StatelessWidget {
-  const DeleteWordConfirmation({
-    required this.word,
-    super.key,
-  });
-
-  final Word word;
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      content: Text(
-        AppLocalizations.of(context)!
-            .confirmDelete(word.word![Language.appLanguageCode]!),
-      ),
-      actions: <Widget>[
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop(false); // Return false on cancel
-          },
-          child: Text(AppLocalizations.of(context)!.cancel),
-        ),
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop(true); // Return true on confirmation
-          },
-          child: Text(AppLocalizations.of(context)!.delete),
-        ),
-      ],
-    );
-  }
-}

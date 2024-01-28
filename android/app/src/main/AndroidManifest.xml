@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
     <application
-        android:label="words"
+        android:label="Words"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -29,6 +30,9 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+            <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-4362861752219412~5799919726"/>
     </application>
     <queries>
     <intent>
@@ -40,4 +44,5 @@
     <action android:name="android.intent.action.TTS_SERVICE" />
     </intent>
     </queries>
+
 </manifest>

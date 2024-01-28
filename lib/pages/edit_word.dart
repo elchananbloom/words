@@ -8,10 +8,10 @@ import 'package:words/l10n.dart';
 import 'package:words/models/enums.dart';
 import 'package:words/models/word/word.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:words/utills/snack_bar.dart';
+import 'package:words/widgets/snack_bar_widget.dart';
 
 class EditWord extends StatefulWidget {
-  EditWord({
+  const EditWord({
     Key? key,
     required this.languageCodeToLearn,
     required this.appLanguageCode,
@@ -30,6 +30,7 @@ class EditWord extends StatefulWidget {
       manageDownloadImage;
 
   @override
+  // ignore: library_private_types_in_public_api
   _EditWordState createState() => _EditWordState();
 }
 
@@ -59,8 +60,11 @@ class _EditWordState extends State<EditWord> {
       _secondSentenceController.text =
           widget.word.sentence![Language.appLanguageCode]!;
       _imageController.text = widget.word.image!;
-      // _image = Image.file(File(widget.word.image!));
-      _image = Image.memory(File(widget.word.image!).readAsBytesSync());
+      try {
+        _image = Image.memory(File(widget.word.image!).readAsBytesSync());
+      } catch (e) {
+        _image = null;
+      }
       wordLanguageToLearnSentence =
           widget.word.sentence![Language.languageCodeToLearn]!;
       wordAppLanguageSentence =
@@ -98,9 +102,9 @@ class _EditWordState extends State<EditWord> {
       },
       image: _imageController.text,
     );
-    print('id: $id');
     await SQLHelper.updateWord(id, updatedWord);
     widget.callback(widget.languageCodeToLearn);
+    // ignore: use_build_context_synchronously
     Navigator.of(context).pop();
   }
 
@@ -129,7 +133,6 @@ class _EditWordState extends State<EditWord> {
                       widget.word.word![Language.english]!.toLowerCase(), true);
                   var file = await File(widget.word.image!).readAsBytes();
                   setState(() {
-                    // imageCache.clear();
                     _image = Image.memory(file);
                     isLoading = false;
                   });
@@ -161,9 +164,11 @@ class _EditWordState extends State<EditWord> {
                                   isLoading = false;
                                 });
                                 _imageSearchController.clear();
+                                // ignore: use_build_context_synchronously
                                 Navigator.of(context).pop();
                               },
-                              child: Text(AppLocalizations.of(context)!.search),
+                              child: Text(AppLocalizations.of(context)!
+                                  .searchInVocabulary),
                             ),
                           ],
                         );
@@ -173,20 +178,20 @@ class _EditWordState extends State<EditWord> {
                   height: 200,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    border: Border.all(
-                      width: 1,
-                      // color: Colors.grey,
-                    ),
-                    borderRadius: BorderRadius.circular(10),
-                    image: DecorationImage(
-                      image: _image!.image,
-                      fit: BoxFit.cover,
-                      colorFilter: ColorFilter.mode(
-                        Colors.black.withOpacity(0.6),
-                        BlendMode.dstATop,
+                      border: Border.all(
+                        width: 1,
                       ),
-                    ),
-                  ),
+                      borderRadius: BorderRadius.circular(10),
+                      image: _image != null
+                          ? DecorationImage(
+                              image: _image!.image,
+                              fit: BoxFit.cover,
+                              colorFilter: ColorFilter.mode(
+                                Colors.black.withOpacity(0.6),
+                                BlendMode.dstATop,
+                              ),
+                            )
+                          : null),
                   child: const Padding(
                     padding: EdgeInsets.all(40.0),
                     child: ImageIcon(
@@ -195,10 +200,6 @@ class _EditWordState extends State<EditWord> {
                       color: Colors.black,
                     ),
                   ),
-                  // Image.asset(
-                  //   'lib/assets/images/image-editing.png',
-                  //   fit: BoxFit.cover,
-                  // ),
                 ),
               ),
               const SizedBox(
@@ -209,7 +210,6 @@ class _EditWordState extends State<EditWord> {
                 decoration: InputDecoration(
                   labelText:
                       L10n.getLanguageName(context, widget.languageCodeToLearn),
-                  // border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(
@@ -220,13 +220,11 @@ class _EditWordState extends State<EditWord> {
                 decoration: InputDecoration(
                   labelText:
                       L10n.getLanguageName(context, widget.appLanguageCode),
-                  // border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(
                 height: 10,
               ),
-              // width: 300,
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -238,7 +236,6 @@ class _EditWordState extends State<EditWord> {
                         labelText: AppLocalizations.of(context)!
                             .sentenceInLanguage(L10n.getLanguageName(
                                 context, widget.languageCodeToLearn)),
-                        // border: const OutlineInputBorder(),
                         suffixIcon: Padding(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 14, vertical: 4),
@@ -256,13 +253,9 @@ class _EditWordState extends State<EditWord> {
                   ),
                 ],
               ),
-
               const SizedBox(
                 height: 10,
               ),
-              // Container(
-              //   width: 300,
-              //   child:
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -274,7 +267,6 @@ class _EditWordState extends State<EditWord> {
                         labelText: AppLocalizations.of(context)!
                             .sentenceInLanguage(L10n.getLanguageName(
                                 context, widget.appLanguageCode)),
-                        // border: const OutlineInputBorder(),
                         suffixIcon: Padding(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 14, vertical: 4),
@@ -284,7 +276,6 @@ class _EditWordState extends State<EditWord> {
                               AppLocalizations.of(context)!.translateTo(
                                   L10n.getLanguageName(
                                       context, widget.languageCodeToLearn)),
-                                      // style: Theme.of(context).elevatedButtonTheme.style?.textStyle!,
                             ),
                           ),
                         ),
@@ -293,7 +284,6 @@ class _EditWordState extends State<EditWord> {
                   ),
                 ],
               ),
-              // ),
               const SizedBox(
                 height: 20,
               ),
@@ -311,11 +301,11 @@ class _EditWordState extends State<EditWord> {
 
                       Navigator.of(context).pop();
                     },
-                    child: Text(AppLocalizations.of(context)!.cancel),
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all<Color>(
                           Theme.of(context).colorScheme.error),
                     ),
+                    child: Text(AppLocalizations.of(context)!.cancel),
                   ),
                   ElevatedButton(
                     onPressed: () async {
@@ -326,14 +316,18 @@ class _EditWordState extends State<EditWord> {
                         _firstSentenceController.text = '';
                         _secondSentenceController.text = '';
                         _imageController.text = '';
+                        // ignore: use_build_context_synchronously
                         Navigator.of(context).pop();
+                        // ignore: use_build_context_synchronously
                         await SnackBarWidget.showSnackBar(
                           context,
+                          // ignore: use_build_context_synchronously
                           AppLocalizations.of(context)!.wordUpdated(
                               widget.word.word![Language.appLanguageCode]!),
                         );
                       }
 
+                      // ignore: use_build_context_synchronously
                       Navigator.of(context).pop();
                     },
                     child: Text(AppLocalizations.of(context)!.updateWord),

@@ -126,4 +126,10 @@ class L10n {
     }
     return LocaleNames.of(context)!.nameOf(countryCode)!;
   }
+
+  static bool isSupported(Locale systemLocale) {
+    //check if the system locale is supported by language codes
+    return supportedLanguages
+        .any((supportedLocale) => supportedLocale.languageCode == systemLocale.languageCode);
+  }
 }

@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:words/db/sql_helper.dart';
 import 'package:words/pages/main_screen.dart';
-import 'package:words/pages/my_home.dart';
-import 'package:words/pages/social_media.dart';
-import 'package:words/pages/speed_slider.dart';
-import 'package:words/pages/user_language_picker.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:words/widgets/first_image_widget.dart';
+import 'package:words/widgets/social_media_widget.dart';
+import 'package:words/widgets/speed_slider_widget.dart';
+import 'package:words/widgets/user_language_picker_widget.dart';
 
 class AppDrawer extends StatefulWidget {
-  AppDrawer({
+  const AppDrawer({
     required this.refreshWordsCallback,
     required this.setUserLanguageToLearn,
     super.key,
@@ -24,15 +22,16 @@ class AppDrawer extends StatefulWidget {
 }
 
 class _AppDrawerState extends State<AppDrawer> {
-  var isNightMode;
-  var wordsCount;
+  bool isNightMode = false;
+  int wordsCount = 0;
+  String email = '';
 
   void getWordsCount() async {
-    var userLanguageToLearn;
+    String? userLanguageToLearn;
     await SharedPreferences.getInstance().then((prefs) {
       userLanguageToLearn = prefs.getString('userLanguageToLearn');
     });
-    wordsCount = await SQLHelper.getWordsCount(userLanguageToLearn);
+    wordsCount = await SQLHelper.getWordsCount(userLanguageToLearn!);
     setState(() {
       wordsCount = wordsCount;
     });
@@ -54,6 +53,49 @@ class _AppDrawerState extends State<AppDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    // var restore = ListTile(
+    //             title: const Text('Restore Words'),
+    //             leading: const Icon(Icons.restore),
+    //             onTap: () async{
+    //               //alert dialog
+    //               showDialog(
+    //                 context: context,
+    //                 builder: (context) {
+    //                   return AlertDialog(
+    //                     title: const Text(
+    //                       'Restore Words',
+    //                       textAlign: TextAlign.center,
+    //                     ),
+    //                     content: TextField(
+    //                       decoration: InputDecoration(
+    //                         hintText: 'Enter your email',
+    //                       ),
+    //                       onChanged: (value) {
+    //                         //set email
+    //                         setState(() {
+    //                           email = value;
+    //                         });
+    //                       },
+    //                     ),
+    //                     actions: [
+    //                       TextButton(
+    //                         onPressed: () async{
+    //                           Navigator.pop(context);
+    //                           //restore words
+    //                           await MongoDb.getWordsFromJson(email);
+    //                           await MongoDb.storeAllWords(email);
+    //                           //refresh words
+    //                           // widget.refreshWordsCallback!();
+    //                         },
+    //                         child: const Text('OK'),
+    //                       ),
+    //                     ],
+    //                   );
+    //                 },
+    //               );
+
+    //             },
+    //           );
     return Drawer(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -84,7 +126,6 @@ class _AppDrawerState extends State<AppDrawer> {
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         const SizedBox(width: 8),
-                        // const Spacer(),
                         UserLanguagePickerWidget(
                           isUserLanguagePicker: true,
                           refreshWordsCallback: widget.refreshWordsCallback,
@@ -98,46 +139,23 @@ class _AppDrawerState extends State<AppDrawer> {
                   ],
                 ),
               ),
-              //night mode
-              // ListTile(
-              //   title: !isNightMode
-              //       ? const Text('Night Mode')
-              //       : const Text('Day Mode'),
-              //   leading: !isNightMode
-              //       ? const Icon(Icons.nightlight_round)
-              //       : const Icon(Icons.wb_sunny),
-              //   // Switch(
-              //   //   value: isNightMode,
-              //   //   onChanged: (value) {
-              //   //     isNightMode = value;
-              //   //     MainScreen.of(context)!.handleChangeTheme();
-              //   //   },
-              //   // ),
-              //   onTap: () {
-              //     setState(() {
-              //       isNightMode = !isNightMode;
-              //       MainScreen.of(context)!.handleChangeTheme();
-              //     });
-              //     // isNightMode = !isNightMode;
-              //     // MainScreen.of(context)!.handleChangeTheme();
-              //   },
-              // ),
-              // const Divider(),
               const ListTile(),
               const ListTile(),
-              FirstImage(),
+              //restore words
+              // restore,
+              const FirstImage(),
 
               //speed
               ListTile(
-                // title: Text('Speed'),
-                trailing: Icon(Icons.speed),
+                trailing: const Icon(Icons.speed),
                 leading:
                     //slider speed
                     Directionality(
                   textDirection: TextDirection.ltr,
                   child: SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.55,
-                      child: SpeedSlider()),
+                    width: MediaQuery.of(context).size.width * 0.55,
+                    child: const SpeedSliderWidget(),
+                  ),
                 ),
               ),
               // const Divider(),
@@ -149,8 +167,8 @@ class _AppDrawerState extends State<AppDrawer> {
               // ChooseVoice(),
               //checkbox to take first image
               // const Divider(),
-              ListTile(),
-              ListTile(),
+              const ListTile(),
+              const ListTile(),
             ],
           ),
           Padding(
@@ -161,12 +179,11 @@ class _AppDrawerState extends State<AppDrawer> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Divider(),
-                  const SocialMedia(),
+                  const SocialMediaWidget(),
                   //all rights reserved
                   Directionality(
                     textDirection: TextDirection.ltr,
                     child: Text("© Elchanan Bloom.",
-                        // AppLocalizations.of(context)!.allRightsReserved,
                         style:
                             Theme.of(context).textTheme.headlineSmall?.copyWith(
                                   color: Colors.grey[400],
@@ -183,105 +200,3 @@ class _AppDrawerState extends State<AppDrawer> {
 }
 
 ////////////////////////////////////////////
-class FirstImage extends StatefulWidget {
-  const FirstImage({
-    super.key,
-  });
-
-  @override
-  _FirstImageState createState() => _FirstImageState();
-}
-
-class _FirstImageState extends State<FirstImage> {
-  late bool isTakeFirstImage;
-
-  @override
-  void initState() {
-    super.initState();
-    //isTakeFirstImage from shared preferences
-    getIsTakeFirstImage();
-  }
-
-  void getIsTakeFirstImage() async {
-    await SharedPreferences.getInstance().then((prefs) {
-      isTakeFirstImage = prefs.getBool('isTakeFirstImage') ?? false;
-      setState(() {
-        isTakeFirstImage = isTakeFirstImage;
-      });
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: const Text('Take First Image'),
-      trailing: const Icon(Icons.camera_alt),
-      leading: Checkbox(
-        value: isTakeFirstImage,
-        onChanged: (value) {
-          setState(() {
-            setIsTakeFirstImage(value);
-          });
-        },
-      ),
-      onTap: () {
-        //pop up dialog
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: const Text(
-                'Take First Image',
-                textAlign: TextAlign.center,
-              ),
-              content: const Text(
-                  'If you want to take the first image of the word from the internet, check this box.',
-                  textAlign: TextAlign.center
-                  ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
-        setState(() {
-          setIsTakeFirstImage(!isTakeFirstImage);
-        });
-      },
-    );
-  }
-
-  void setIsTakeFirstImage(bool? value) {
-    isTakeFirstImage = value!;
-    //save isTakeFirstImage to shared preferences
-    SharedPreferences.getInstance().then((prefs) {
-      prefs.setBool('isTakeFirstImage', isTakeFirstImage);
-    });
-  }
-}
-
-////////////////////////////////////////////////
-class ChooseVoice extends StatefulWidget {
-  const ChooseVoice({
-    super.key,
-  });
-
-  @override
-  _ChooseVoiceState createState() => _ChooseVoiceState();
-}
-
-class _ChooseVoiceState extends State<ChooseVoice> {
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButton(
-      value: 'en-us-x-iol-local',
-      onChanged: (value) {},
-      items: [],
-    );
-  }
-}

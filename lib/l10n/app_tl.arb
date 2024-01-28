@@ -7,7 +7,7 @@
     "chooseAppLanguage": "Pumili ng wika ng aplikasyon",
     "addWord": "Magdagdag ng salita",
     "sentenceInLanguage": "Pangungusap sa {language}",
-    "search": "Maghanap",
+    "searchInVocabulary": "Maghanap sa talahuluganan",
     "continueText": "Magpatuloy",
     "welcomeToWords": "Maligayang pagdating sa Mga Salita!",
     "selectLanguage": "Pumili ng wika",
@@ -20,8 +20,11 @@
     "confirmDelete": "Sigurado ka bang gusto mong burahin ang salitang {word}?",
     "deleteLanguageConfirmation": "Sigurado ka bang gusto mong burahin ang wika na {language}?",
     "delete": "Burahin",
+    "edit": "I-edit",
     "noSentenceFound": "Walang natagpuang pangungusap",
     "pleaseFillBothFields": "Pakisulat ang salitang {appLanguage} at salitang {languageToLearn}.",
     "languageDeleted": "Nabura ang wika na {language}",
+    "iWantToLearn": "Gusto kong matuto ng",
+    "myMotherToungueIs": "Ang aking katutubong wika ay",
     "image": "Larawan"
 }

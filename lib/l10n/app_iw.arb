@@ -7,7 +7,7 @@
     "chooseAppLanguage": "בחר שפה לאפליקציה",
     "addWord": "הוסף מילה",
     "sentenceInLanguage": "משפט בשפה: {language}",
-    "search": "חיפוש",
+    "searchInVocabulary": "חפש באוצר המילים",
     "continueText": "המשך",
     "welcomeToWords": "ברוכים הבאים למילים!",
     "selectLanguage": "בחר שפה",
@@ -20,9 +20,12 @@
     "confirmDelete": "האם אתה בטוח שברצונך למחוק את המילה {word}?",
     "deleteLanguageConfirmation": "האם אתה בטוח שברצונך למחוק את השפה {language}?",
     "delete": "מחק",
+    "edit": "ערוך",
     "noSentenceFound": "לא נמצאו משפטים",
     "pleaseFillBothFields": "אנא מלא את המילה ב-{appLanguage} ואת המילה ב-{languageToLearn}.",
     "languageDeleted": "השפה {language} נמחקה",
+    "iWantToLearn": "אני רוצה ללמוד",
+    "myMotherToungueIs": "שפת האם שלי היא",
     "image": "תמונה"
 
 

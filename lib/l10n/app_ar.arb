@@ -7,7 +7,7 @@
     "chooseAppLanguage": "اختر لغة التطبيق",
     "addWord": "إضافة كلمة",
     "sentenceInLanguage": "جملة باللغة: {language}",
-    "search": "بحث",
+    "searchInVocabulary": "البحث في المفردات",
     "continueText": "استمرار",
     "welcomeToWords": "مرحبًا بكم في الكلمات!",
     "selectLanguage": "اختيار اللغة",
@@ -20,8 +20,11 @@
     "confirmDelete": "هل أنت متأكد أنك تريد حذف الكلمة {word}؟",
     "deleteLanguageConfirmation": "هل أنت متأكد أنك تريد حذف اللغة {language}؟",
     "delete": "حذف",
+    "edit": "تعديل",
     "noSentenceFound": "لم يتم العثور على جمل",
     "pleaseFillBothFields": "يرجى ملء الحقلين بكلمة باللغة {appLanguage} و{languageToLearn}.",
     "languageDeleted": "تم حذف اللغة {language}",
+    "iWantToLearn": "أريد أن أتعلم",
+    "myMotherToungueIs": "لغتي الأم هي",
     "image": "صورة"
 }

@@ -7,7 +7,7 @@
     "chooseAppLanguage": "Scegli la lingua dell'app",
     "addWord": "Aggiungi parola",
     "sentenceInLanguage": "Frase in {language}",
-    "search": "Cerca",
+    "searchInVocabulary": "Cerca nel vocabolario",
     "continueText": "Continua",
     "welcomeToWords": "Benvenuti in Parole!",
     "selectLanguage": "Seleziona lingua",
@@ -20,8 +20,11 @@
     "confirmDelete": "Sei sicuro di voler eliminare la parola {word}?",
     "deleteLanguageConfirmation": "Sei sicuro di voler eliminare la lingua {language}?",
     "delete": "Elimina",
+    "edit": "Modifica",
     "noSentenceFound": "Nessuna frase trovata",
     "pleaseFillBothFields": "Si prega di compilare la parola in {appLanguage} e la parola in {languageToLearn}.",
     "languageDeleted": "Lingua {language} eliminata",
+    "iWantToLearn": "Voglio imparare",
+    "myMotherToungueIs": "La mia lingua madre è",
     "image": "Immagine"
 }

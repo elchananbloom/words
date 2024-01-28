@@ -7,7 +7,7 @@
     "chooseAppLanguage": "Выберите язык приложения",
     "addWord": "Добавить слово",
     "sentenceInLanguage": "Предложение на {language}",
-    "search": "Поиск",
+    "searchInVocabulary": "Поиск в словаре",
     "continueText": "Продолжить",
     "welcomeToWords": "Добро пожаловать в Слова!",
     "selectLanguage": "Выбрать язык",
@@ -20,8 +20,11 @@
     "confirmDelete": "Вы уверены, что хотите удалить слово {word}?",
     "deleteLanguageConfirmation": "Вы уверены, что хотите удалить язык {language}?",
     "delete": "Удалить",
+    "edit": "Редактировать",
     "noSentenceFound": "Предложения не найдены",
     "pleaseFillBothFields": "Пожалуйста, заполните слово на {appLanguage} и слово на {languageToLearn}.",
     "languageDeleted": "Язык {language} удален",
+    "iWantToLearn": "Я хочу изучать",
+    "myMotherToungueIs": "Мой родной язык",
     "image": "Изображение"
 }

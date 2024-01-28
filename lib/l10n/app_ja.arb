@@ -7,7 +7,7 @@
     "chooseAppLanguage": "アプリ言語を選択",
     "addWord": "単語を追加",
     "sentenceInLanguage": "{language}の文",
-    "search": "検索",
+    "searchInVocabulary": "単語を検索",
     "continueText": "続行",
     "welcomeToWords": "ようこそWordsへ！",
     "selectLanguage": "言語を選択",
@@ -20,8 +20,11 @@
     "confirmDelete": "単語「{word}」を削除してもよろしいですか？",
     "deleteLanguageConfirmation": "{language}を削除してもよろしいですか？",
     "delete": "削除",
+    "edit": "編集",
     "noSentenceFound": "文が見つかりません",
     "pleaseFillBothFields": "{appLanguage}の単語と{languageToLearn}の単語を入力してください。",
     "languageDeleted": "{language}が削除されました",
+    "iWantToLearn": "学習したい言語",
+    "myMotherToungueIs": "母国語は",
     "image": "画像"
 }
