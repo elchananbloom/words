@@ -11,11 +11,13 @@ class AppDrawer extends StatefulWidget {
   const AppDrawer({
     required this.refreshWordsCallback,
     required this.setUserLanguageToLearn,
+    required this.showTutorial,
     super.key,
   });
 
   final Function? refreshWordsCallback;
   final Function()? setUserLanguageToLearn;
+  final Function()? showTutorial;
 
   @override
   _AppDrawerState createState() => _AppDrawerState();
@@ -107,16 +109,28 @@ class _AppDrawerState extends State<AppDrawer> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    IconButton(
-                      icon: !isNightMode
-                          ? const Icon(Icons.mode_night)
-                          : const Icon(Icons.wb_sunny),
-                      onPressed: () {
-                        setState(() {
-                          isNightMode = !isNightMode;
-                          MainScreen.of(context)!.handleChangeTheme();
-                        });
-                      },
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: !isNightMode
+                              ? const Icon(Icons.mode_night)
+                              : const Icon(Icons.wb_sunny),
+                          onPressed: () {
+                            setState(() {
+                              isNightMode = !isNightMode;
+                              MainScreen.of(context)!.handleChangeTheme();
+                            });
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.help_outline),
+                          onPressed: () {
+                            //pop
+                            Navigator.pop(context);
+                            widget.showTutorial!();
+                          },
+                        ),
+                      ],
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,

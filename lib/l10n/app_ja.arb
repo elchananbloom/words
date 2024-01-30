@@ -26,5 +26,14 @@
     "languageDeleted": "{language}が削除されました",
     "iWantToLearn": "学習したい言語",
     "myMotherToungueIs": "母国語は",
+    "wordInAppLanguageTutorialDescription": "ここには、英語の単語を語彙リストに追加するために入力する場所があります。",
+    "wordInLanguageToLearnTutorialDescription": "ここには、{language}の語彙リストに追加したい単語を入力するか、自動で英語から翻訳する場所があります。",
+    "addWordTutorialDescription": "ここには、単語を語彙リストに追加する場所があります。\nボタンを押すと画像が表示され、その中から単語を最もよく表すものを選択する必要があります。\n画像を選択した後、語彙リストで単語を確認できます。",
+    "searchInVocabularyTutorialDescription": "ここには、すでに語彙リストに追加した単語を検索できる場所があります。",
+    "favoritesTutorialDescription": "ここには、お気に入りの単語をすべて見ることができる場所があります。",
+    "menuTutorialDescription": "ここには、学びたい言語を追加または変更できる場所があります。\nここでは、語彙リストに含まれる単語の数やアプリの設定も確認できます。",
+    "next": "次へ",
+    "skip": "スキップ",
+    "finish": "終了",
     "image": "画像"
 }

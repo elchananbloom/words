@@ -26,6 +26,15 @@
     "languageDeleted": "השפה {language} נמחקה",
     "iWantToLearn": "אני רוצה ללמוד",
     "myMotherToungueIs": "שפת האם שלי היא",
+    "wordInAppLanguageTutorialDescription": "כאן אתה כותב את המילה שברצונך להוסיף לרשימת המילים שלך בעברית.",
+    "wordInLanguageToLearnTutorialDescription": "כאן אתה כותב או מתרגם אוטומטית מעברית את המילה שברצונך להוסיף לרשימת המילים שלך ב {language}.",
+    "addWordTutorialDescription": "כאן אתה מוסיף את המילה לרשימת המילים שלך.\nכשאתה לוחץ על הכפתור, יוצג לך תמונה ותצטרך לבחור את התמונה שתארה את המילה בצורה הטובה ביותר.\nלאחר שתבחר בתמונה, תוכל לראות את המילה ברשימת המילים שלך.",
+    "searchInVocabularyTutorialDescription": "כאן אתה יכול לחפש את המילה שכבר הוספת לרשימת המילים שלך.",
+    "favoritesTutorialDescription": "כאן אתה יכול לראות את כל המילים המועדפות עליך.",
+    "menuTutorialDescription": "כאן אתה יכול להוסיף ולשנות שפות שברצונך ללמוד.\nכאן תוכל גם לראות כמה מילים יש לך ברשימת המילים שלך ואת הגדרות האפליקציה.",
+    "next": "הבא",
+    "skip": "דלג",
+    "finish": "סיום",
     "image": "תמונה"
 
 

@@ -6,9 +6,12 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pixabay_picker/model/pixabay_media.dart';
 import 'package:pixabay_picker/pixabay_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'package:words/db/sql_helper.dart';
+import 'package:words/l10n.dart';
 import 'package:words/pages/app_drawer.dart';
 import 'package:words/widgets/banner_ad_widget.dart';
+import 'package:words/widgets/coach_mark_description.dart';
 import 'package:words/widgets/word_card_widget.dart';
 import 'package:words/models/word/word.dart';
 import 'package:words/widgets/search_bar_widget.dart';
@@ -38,6 +41,17 @@ class _HomePageState extends State<HomePage> {
   var imageUrl = '';
   var isDrawerOpen = false;
   bool isHasWords = false;
+  bool isTutorialShown = false;
+
+  TutorialCoachMark? tutorialCoachMark;
+  List<TargetFocus> targets = [];
+
+  GlobalKey keyWordApp = GlobalKey();
+  GlobalKey keyWordLearn = GlobalKey();
+  GlobalKey keyAddWord = GlobalKey();
+  GlobalKey keySearchBar = GlobalKey();
+  GlobalKey keyStar = GlobalKey();
+  GlobalKey keyDrawer = GlobalKey();
 
   void _refreshWords(String lang, {String query = ''}) async {
     final data = await SQLHelper.getWordsBySearch(lang, query);
@@ -63,8 +77,184 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    super.initState();
     setUserLanguageToLearn();
+    SharedPreferences.getInstance().then((prefs) {
+      var isTutorialShown = prefs.getBool('isTutorialShown') ?? false;
+      setState(() {
+        this.isTutorialShown = isTutorialShown;
+      });
+      if (!isTutorialShown) {
+        showTutorial();
+      }
+    });
+
+    super.initState();
+  }
+
+  void showTutorial() {
+    Future.delayed(const Duration(milliseconds: 500), () {
+      _showTutorialCoachMark();
+    });
+  }
+
+  void _showTutorialCoachMark() {
+    _initTargets();
+    tutorialCoachMark = TutorialCoachMark(
+      targets: targets,
+      pulseEnable: false,
+
+      hideSkip: true,
+
+      colorShadow: Theme.of(context).cardColor,
+    )..show(context: context);
+  }
+
+  void _initTargets() {
+    targets = [
+      TargetFocus(
+        identify: 'word-app-key',
+        keyTarget: keyWordApp,
+        shape: ShapeLightFocus.RRect,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) {
+              return CoachMarkDescription(
+                description: AppLocalizations.of(context)!.wordInAppLanguageTutorialDescription,
+                // skip: AppLocalizations.of(context)!.skip,
+                // next: AppLocalizations.of(context)!.next,
+                onSkip: () {
+                  controller.skip();
+                },
+                onNext: () {
+                  controller.next();
+                },
+              );
+            },
+          ),
+        ],
+      ),
+      TargetFocus(
+        identify: 'word-learn-key',
+        keyTarget: keyWordLearn,
+        shape: ShapeLightFocus.RRect,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) {
+              return CoachMarkDescription(
+                description: AppLocalizations.of(context)!.wordInLanguageToLearnTutorialDescription(L10n.getLanguageName(context, languageCodeToLearn)),
+                // skip: AppLocalizations.of(context)!.skip,
+                // next: AppLocalizations.of(context)!.next,
+                onSkip: () {
+                  controller.skip();
+                },
+                onNext: () {
+                  controller.next();
+                },
+              );
+            },
+          ),
+        ],
+      ),
+      TargetFocus(
+        identify: 'add-word-key',
+        keyTarget: keyAddWord,
+        shape: ShapeLightFocus.RRect,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) {
+              return CoachMarkDescription(
+                description: AppLocalizations.of(context)!.addWordTutorialDescription,
+                // skip: AppLocalizations.of(context)!.skip,
+                // next: AppLocalizations.of(context)!.next,
+                onSkip: () {
+                  controller.skip();
+                },
+                onNext: () {
+                  controller.next();
+                },
+              );
+            },
+          ),
+        ],
+      ),
+      TargetFocus(
+        identify: 'search-key',
+        keyTarget: keySearchBar,
+        shape: ShapeLightFocus.RRect,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) {
+              return CoachMarkDescription(
+                description: AppLocalizations.of(context)!.searchInVocabularyTutorialDescription,
+                // skip: AppLocalizations.of(context)!.skip,
+                // next: AppLocalizations.of(context)!.next,
+                onSkip: () {
+                  controller.skip();
+                },
+                onNext: () {
+                  controller.next();
+                },
+              );
+            },
+          ),
+        ],
+      ),
+      TargetFocus(
+        identify: 'star-key',
+        keyTarget: keyStar,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) {
+              return CoachMarkDescription(
+                description: AppLocalizations.of(context)!.favoritesTutorialDescription,
+                // skip: AppLocalizations.of(context)!.skip,
+                // next: AppLocalizations.of(context)!.next,
+                onSkip: () {
+                  controller.skip();
+                },
+                onNext: () {
+                  controller.next();
+                },
+              );
+            },
+          ),
+        ],
+      ),
+      TargetFocus(
+        identify: 'drawer-key',
+        keyTarget: keyDrawer,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) {
+              return CoachMarkDescription(
+                description: AppLocalizations.of(context)!.menuTutorialDescription,
+                // skip: AppLocalizations.of(context)!.skip,
+                next: AppLocalizations.of(context)!.finish,
+                onSkip: () {
+                  controller.skip();
+                },
+                onNext: () {
+                  // save that the tutorial was shown
+                  SharedPreferences.getInstance().then((prefs) {
+                    prefs.setBool('isTutorialShown', true);
+                  });
+                  setState(() {
+                    isTutorialShown = true;
+                  });
+                  controller.next();
+                },
+              );
+            },
+          ),
+        ],
+      ),
+    ];
   }
 
   void setUserLanguageToLearn() {
@@ -240,6 +430,7 @@ class _HomePageState extends State<HomePage> {
       endDrawer: AppDrawer(
         refreshWordsCallback: refreshWordsCallback,
         setUserLanguageToLearn: setUserLanguageToLearn,
+        showTutorial: showTutorial,
       ),
       body: Stack(children: [
         NotificationListener<ScrollNotification>(
@@ -267,6 +458,9 @@ class _HomePageState extends State<HomePage> {
                     refreshWordsCallback: refreshWordsCallback,
                     handleIsLoading: handleIsLoading,
                     manageDownloadImage: manageDownloadImage,
+                    keyAddWord: keyAddWord,
+                    keyWordLearn: keyWordLearn,
+                    keyWordApp: keyWordApp,
                   ),
                 ),
                 SliverList(
@@ -305,6 +499,7 @@ class _HomePageState extends State<HomePage> {
     var appBarIcons = Row(
       children: [
         IconButton(
+          key: keyStar,
           icon: Icon(
             Icons.star,
             color: !isFavorite ? Colors.yellow : Colors.grey[400],
@@ -357,6 +552,7 @@ class _HomePageState extends State<HomePage> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               IconButton(
+                                key: keyDrawer,
                                 icon: const Icon(Icons.menu),
                                 onPressed: () {
                                   Scaffold.of(context).openEndDrawer();
@@ -375,8 +571,9 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       actions: [Container()],
-      bottom: isHasWords
+      bottom: isHasWords || !isTutorialShown
           ? Tab(
+              key: keySearchBar,
               height: 80,
               child: SearchBarWidget(
                 refreshWordsCallback: refreshWordsCallback,

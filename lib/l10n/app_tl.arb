@@ -26,5 +26,14 @@
     "languageDeleted": "Nabura ang wika na {language}",
     "iWantToLearn": "Gusto kong matuto ng",
     "myMotherToungueIs": "Ang aking katutubong wika ay",
+    "wordInAppLanguageTutorialDescription": "Dito mo itinatype ang salita na nais mong idagdag sa iyong listahan ng vocabulary sa Ingles.",
+    "wordInLanguageToLearnTutorialDescription": "Dito mo itinatype o ini-automate na isinalin mula sa Ingles ang salita na nais mong idagdag sa iyong listahan ng vocabulary sa {language}.",
+    "addWordTutorialDescription": "Dito mo idinadagdag ang salita sa iyong listahan ng vocabulary.\nKapag pindutin mo ang pindutan, ipapakita sa iyo ang isang larawan at kailangan mong pumili ng kung alin dito ang pinakamaganda na naglalarawan ng salita.\nPagkatapos mong pumili ng larawan, makikita mo ang salita sa iyong listahan ng vocabulary.",
+    "searchInVocabularyTutorialDescription": "Dito mo maaaring hanapin ang isang salita na iyong idinagdag na sa iyong listahan ng vocabulary.",
+    "favoritesTutorialDescription": "Dito mo makikita ang lahat ng iyong paboritong mga salita.",
+    "menuTutorialDescription": "Dito mo maaaring idagdag at baguhin ang mga wika na nais mong matutunan.\nDito mo rin makikita kung ilan ang mga salita sa iyong listahan ng vocabulary at ang mga setting ng app.",
+    "next": "Susunod",
+    "skip": "Laktawan",
+    "finish": "Tapos",
     "image": "Larawan"
 }

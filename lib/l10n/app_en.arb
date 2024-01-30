@@ -161,6 +161,47 @@
     "@myMotherToungueIs": {
         "description": "my mother toungue is"
     },
+    "wordInAppLanguageTutorialDescription": "This is where you type the word you want to add to your vocabulary list in English.",
+    "@wordInAppLanguageTutorialDescription": {
+        "description": "word in app language tutorial description"
+    },
+    "wordInLanguageToLearnTutorialDescription": "This is where you type or automated translate from English the word you want to add to your vocabulary list in {language}.",
+    "@wordInLanguageToLearnTutorialDescription": {
+        "description": "word in language to learn tutorial description",
+        "placeholders": {
+            "language": {
+                "type": "String"
+            }
+        }
+    },
+    "addWordTutorialDescription": "This is where you add the word to your vocabulary list.\nWhen you press the button an image will be shown to you and you will have to choose the one that best describes the word.\nAfter you choose the image you will be able to see the word in your vocabulary list.",
+    "@addWordTutorialDescription": {
+        "description": "add word tutorial description"
+    },
+    "searchInVocabularyTutorialDescription": "This is where you can search for a word you already added in your vocabulary list.",
+    "@searchInVocabularyTutorialDescription": {
+        "description": "search in vocabulary tutorial description"
+    },
+    "favoritesTutorialDescription": "This is where you can see all your favorite words.",
+    "@favoritesTutorialDescription": {
+        "description": "favorites tutorial description"
+    },
+    "menuTutorialDescription": "This is where you can add and change languages you want to learn.\nHere you can also see how many words you have in your vocabulary list and the app settings.",
+    "@menuTutorialDescription": {
+        "description": "menu tutorial description"
+    },
+    "next": "Next",
+    "@next": {
+        "description": "next"
+    },
+    "skip": "Skip",
+    "@skip": {
+        "description": "skip"
+    },
+    "finish": "Finish",
+    "@finish": {
+        "description": "finish"
+    },
     "image": "Image",
     "@image": {
         "description": "the image"

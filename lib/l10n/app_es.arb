@@ -26,5 +26,14 @@
     "languageDeleted": "Idioma {language} eliminado",
     "iWantToLearn": "Quiero aprender",
     "myMotherToungueIs": "Mi lengua materna es",
+    "wordInAppLanguageTutorialDescription": "Aquí es donde escribes la palabra que quieres agregar a tu lista de vocabulario en inglés.",
+    "wordInLanguageToLearnTutorialDescription": "Aquí es donde escribes o traduces automáticamente del inglés la palabra que quieres agregar a tu lista de vocabulario en {language}.",
+    "addWordTutorialDescription": "Aquí es donde añades la palabra a tu lista de vocabulario.\nCuando presionas el botón, se te mostrará una imagen y tendrás que elegir la que mejor describa la palabra.\nDespués de elegir la imagen, podrás ver la palabra en tu lista de vocabulario.",
+    "searchInVocabularyTutorialDescription": "Aquí es donde puedes buscar una palabra que ya has agregado a tu lista de vocabulario.",
+    "favoritesTutorialDescription": "Aquí es donde puedes ver todas tus palabras favoritas.",
+    "menuTutorialDescription": "Aquí es donde puedes añadir y cambiar los idiomas que quieres aprender.\nAquí también puedes ver cuántas palabras tienes en tu lista de vocabulario y las configuraciones de la aplicación.",
+    "next": "Siguiente",
+    "skip": "Saltar",
+    "finish": "Terminar",
     "image": "Imagen"
 }

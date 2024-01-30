@@ -26,5 +26,14 @@
     "languageDeleted": "Sprache {language} wurde gelöscht",
     "iWantToLearn": "Ich möchte lernen",
     "myMotherToungueIs": "Meine Muttersprache ist",
+    "wordInAppLanguageTutorialDescription": "Hier tippen Sie das Wort ein, das Sie Ihrer Vokabelliste in Englisch hinzufügen möchten.",
+    "wordInLanguageToLearnTutorialDescription": "Hier tippen Sie das Wort ein oder übersetzen es automatisch aus dem Englischen in die Sprache, die Sie lernen möchten.",
+    "addWordTutorialDescription": "Hier fügen Sie das Wort Ihrer Vokabelliste hinzu.\nWenn Sie auf den Button drücken, wird Ihnen ein Bild angezeigt, und Sie müssen dasjenige auswählen, das das Wort am besten beschreibt.\nNachdem Sie das Bild ausgewählt haben, können Sie das Wort in Ihrer Vokabelliste sehen.",
+    "searchInVocabularyTutorialDescription": "Hier können Sie nach einem Wort suchen, das Sie bereits zu Ihrer Vokabelliste hinzugefügt haben.",
+    "favoritesTutorialDescription": "Hier sehen Sie alle Ihre Lieblingswörter.",
+    "menuTutorialDescription": "Hier können Sie Sprachen hinzufügen und ändern, die Sie lernen möchten.\nHier sehen Sie auch, wie viele Wörter sich in Ihrer Vokabelliste befinden, sowie die App-Einstellungen.",
+    "next": "Weiter",
+    "skip": "Überspringen",
+    "finish": "Beenden",
     "image": "Bild"
 }

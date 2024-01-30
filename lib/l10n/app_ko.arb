@@ -26,6 +26,15 @@
     "languageDeleted": "{language} 언어가 삭제되었습니다",
     "iWantToLearn": "배우고 싶습니다",
     "myMotherToungueIs": "나의 모국어는",
+    "wordInAppLanguageTutorialDescription": "여기에는 영어 어휘 목록에 추가하려는 단어를 입력하는 곳이 있습니다.",
+    "wordInLanguageToLearnTutorialDescription": "여기에는 {language} 어휘 목록에 추가하려는 단어를 입력하거나 자동으로 영어에서 번역하는 곳이 있습니다.",
+    "addWordTutorialDescription": "여기에는 단어를 어휘 목록에 추가하는 곳이 있습니다.\n버튼을 누르면 이미지가 표시되고 해당 단어를 가장 잘 설명하는 이미지를 선택해야 합니다.\n이미지를 선택한 후 어휘 목록에서 해당 단어를 볼 수 있습니다.",
+    "searchInVocabularyTutorialDescription": "여기에는 이미 어휘 목록에 추가한 단어를 검색할 수 있는 곳이 있습니다.",
+    "favoritesTutorialDescription": "여기에는 모든 즐겨찾기한 단어를 볼 수 있는 곳이 있습니다.",
+    "menuTutorialDescription": "여기에는 학습하고 싶은 언어를 추가하고 변경할 수 있는 곳이 있습니다.\n여기에서 어휘 목록에 있는 단어의 수와 앱 설정도 확인할 수 있습니다.",
+    "next": "다음",
+    "skip": "건너뛰기",
+    "finish": "완료",
     "image": "이미지"
 
 }

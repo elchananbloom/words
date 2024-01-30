@@ -20,6 +20,9 @@ class AddWordWidget extends ConsumerStatefulWidget {
       required this.refreshWordsCallback,
       required this.handleIsLoading,
       required this.manageDownloadImage,
+      this.keyAddWord,
+      this.keyWordLearn,
+      this.keyWordApp,
       Key? key})
       : super(key: key);
 
@@ -28,6 +31,9 @@ class AddWordWidget extends ConsumerStatefulWidget {
   final Function(bool isLoading) handleIsLoading;
   final Future<String> Function(String, bool, {String imageSearch})
       manageDownloadImage;
+  final GlobalKey? keyAddWord;
+  final GlobalKey? keyWordLearn;
+  final GlobalKey? keyWordApp;
 
   @override
   _AddWordState createState() => _AddWordState();
@@ -43,7 +49,6 @@ class _AddWordState extends ConsumerState<AddWordWidget> {
 
   @override
   void initState() {
-    super.initState();
     // Set the initial values.
     ref.read(newLangToLearnWordProvider.notifier).state = '';
     ref.read(newAppLangWordProvider.notifier).state = '';
@@ -70,6 +75,7 @@ class _AddWordState extends ConsumerState<AddWordWidget> {
         });
       }
     });
+    super.initState();
   }
 
   String removeDiacritics(String input) {
@@ -84,25 +90,23 @@ class _AddWordState extends ConsumerState<AddWordWidget> {
     final languageToLearnWord =
         removeDiacritics(ref.read(newLangToLearnWordProvider.notifier).state);
     //check if word already exists
-    final wordExists = await SQLHelper.isWordExist(languageCodeToLearn,
-        appLanguageWord, languageToLearnWord);
+    final wordExists = await SQLHelper.isWordExist(
+        languageCodeToLearn, appLanguageWord, languageToLearnWord);
     if (wordExists) {
       //TODO add language
       // ignore: use_build_context_synchronously
-      SnackBarWidget.showSnackBar(
-        context,
-        "word already exists"
-        // AppLocalizations.of(context)!.wordAlreadyExists(
-        //     L10n.getLanguageName(context, appLanguageCode),
-        //     L10n.getLanguageName(context, languageCodeToLearn)),
-      );
+      SnackBarWidget.showSnackBar(context, "word already exists"
+          // AppLocalizations.of(context)!.wordAlreadyExists(
+          //     L10n.getLanguageName(context, appLanguageCode),
+          //     L10n.getLanguageName(context, languageCodeToLearn)),
+          );
       ref.read(newEnglishWordProvider.notifier).state = '';
-    ref.read(newAppLangWordProvider.notifier).state = '';
-    ref.read(newLangToLearnWordProvider.notifier).state = '';
+      ref.read(newAppLangWordProvider.notifier).state = '';
+      ref.read(newLangToLearnWordProvider.notifier).state = '';
 
-    _firstController.clear();
-    _secondController.clear();
-    FocusScope.of(context).unfocus();
+      _firstController.clear();
+      _secondController.clear();
+      FocusScope.of(context).unfocus();
       return;
     }
     String engSentence = '';
@@ -187,15 +191,16 @@ class _AddWordState extends ConsumerState<AddWordWidget> {
   }
 
   TextDirection getTextDirection(String languageCode) {
-  // Check if the language code indicates RTL language
-  if (languageCode.toLowerCase() == 'ar' || languageCode.toLowerCase() == 'iw') {
-    // Arabic and Hebrew are RTL languages
-    return TextDirection.rtl;
-  } else {
-    // All other languages are considered LTR
-    return TextDirection.ltr;
+    // Check if the language code indicates RTL language
+    if (languageCode.toLowerCase() == 'ar' ||
+        languageCode.toLowerCase() == 'iw') {
+      // Arabic and Hebrew are RTL languages
+      return TextDirection.rtl;
+    } else {
+      // All other languages are considered LTR
+      return TextDirection.ltr;
+    }
   }
-}
 
   @override
   void dispose() {
@@ -225,6 +230,7 @@ class _AddWordState extends ConsumerState<AddWordWidget> {
                 width: 150,
                 height: 30,
                 child: TextField(
+                  key: widget.keyWordLearn,
                   controller: _firstController,
                   focusNode: _firstFocusNode,
                   decoration:
@@ -264,6 +270,7 @@ class _AddWordState extends ConsumerState<AddWordWidget> {
                 width: 150,
                 height: 30,
                 child: TextField(
+                  key: widget.keyWordApp,
                   controller: _secondController,
                   focusNode: _secondFocusNode,
                   decoration: getWordDecoration(appLanguageCode).copyWith(
@@ -303,6 +310,7 @@ class _AddWordState extends ConsumerState<AddWordWidget> {
           // width: 150,
           height: 30,
           child: ElevatedButton(
+            key: widget.keyAddWord,
             onPressed: () {
               handleAddWord(appLanguageCode);
             },
