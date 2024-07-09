@@ -8,6 +8,8 @@ A convenient user interface designed for ease of use, featuring favorites words,
 
 To download the app visit google play at: https://play.google.com/store/apps/details?id=com.words.app.elchanan
 
+TO check the code, enter to 'lib' folder.
+
 
 
 https://github.com/elchananbloom/words/assets/72875133/af25a819-cac4-4176-89dc-890de1bd49c2
