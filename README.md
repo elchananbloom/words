@@ -8,7 +8,7 @@ A convenient user interface designed for ease of use, featuring favorites words,
 
 To download the app visit google play at: https://play.google.com/store/apps/details?id=com.words.app.elchanan
 
-TO check the code, enter to 'lib' folder.
+To check the code, enter to 'lib' folder.
 
 
 
